@@ -29,11 +29,13 @@ color_dictionary = {
   "VV" : "#de8c6a", # sandy red, from RGB 222 140 106
   #"VV" : "#808080", # grey
   "QCD": "#ffccff", # pink kMagenta -10
+  "DYInc" : "#ffcc66",
 }
 label_dictionary = {
- "ggH" : "ggH",
- "VBF" : "VBF",
+ "ggH_TauTau" : "ggH",
+ "VBF_TauTau" : "VBF",
  "DY"  : "DY",
+ "DYInc"  : "DYInc",
  "TT"  : "TT",
  "ST"  : "ST",
  "WJ"  : "WJ",
@@ -46,6 +48,7 @@ MC_dictionary = {
   "myQCD" : {"label": "QCD", "color": color_dictionary["QCD"]},
   "QCD" : {"label": "QCD", "color": color_dictionary["QCD"]},
   "DY"  : {"label": "DY", "color": color_dictionary["DY"]},
+  "DYInc"  : {"label": "DYInc", "color": color_dictionary["DYInc"]},
   "TT"  : {"label": "TT", "color": color_dictionary["TT"]},
   "ST"  : {"label": "ST", "color": color_dictionary["ST"]},
   "WJ"  : {"label": "W+Jets", "color": color_dictionary["WJ"]},
@@ -56,39 +59,27 @@ MC_dictionary = {
   # below are real dictionaries for subprocesses          #
   #########################################################
 
-  "ggH"      : {"label": "ggH", "color": color_dictionary["ggH"], "plot_scaling" : 100},
-  "VBF"      : {"label": "VBF", "color": color_dictionary["VBF"], "plot_scaling" : 100},
-  # TODO : address this type of thing at some point to remove need to duplicate code..
-  "ggH_old"  : {"label": "ggH", "color": color_dictionary["ggH"], "plot_scaling" : 1},
-  "ggH_new"  : {"label": "ggH", "color": color_dictionary["ggH"], "plot_scaling" : 1},
-  "VBF_old"  : {"label": "VBF", "color": color_dictionary["VBF"], "plot_scaling" : 1},
-  "VBF_new"  : {"label": "VBF", "color": color_dictionary["VBF"], "plot_scaling" : 1},
+  "ggH_TauTau" : {"XSec": XSec["ggH_TauTau"], "NWEvents": 19289464.362, 
+           "label": "ggH", "color": color_dictionary["ggH"],
+           "plot_scaling" : 100},
 
-  "DYInc"    : {"label": "DY", "color": color_dictionary["DY"], "plot_scaling" : 1.12}, # k-factor to NNLO
-  "DY10to50" : {"label": "DY", "color": color_dictionary["DY"], "plot_scaling" : 1.12}, # k-factor to NNLO
+  "VBF_TauTau" : {"XSec": XSec["VBF_TauTau"], "NWEvents": 2402853.147599998, 
+           "label": "VBF", "color": color_dictionary["VBF"],
+           "plot_scaling" : 100},
 
   # copies of DYInc with different colors and labels
   "DYGen"    : {"label": r"$Z{\rightarrow}{\tau_\mu}{\tau_h}$", "color": color_dictionary["DYGen"], "plot_scaling" : 1.12},
   "DYLep"    : {"label": r"$Z{\rightarrow}ll, l{\rightarrow}{\tau_h}$", "color": color_dictionary["DYLep"], "plot_scaling" : 1.12},
   "DYJet"    : {"label": r"$DY, j{\rightarrow}{\tau_h}$", "color": color_dictionary["DYJet"], "plot_scaling" : 1.12},
-  "DYGen10to50"    : {"label": r"$Z{\rightarrow}{\tau_\mu}{\tau_h}$", "color": color_dictionary["DYGen"], "plot_scaling" : 1.12},
-  "DYLep10to50"    : {"label": r"$Z{\rightarrow}ll, l{\rightarrow}{\tau_h}$", "color": color_dictionary["DYLep"], "plot_scaling" : 1.12},
-  "DYJet10to50"    : {"label": r"$DY, j{\rightarrow}{\tau_h}$", "color": color_dictionary["DYJet"], "plot_scaling" : 1.12},
 
-
-  "DYIncNLO"    : {"label": "DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
-  "DY10to50NLO" : {"label": "DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
+  "DYIncNLO" : {"label": "DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
+  "DYInc" : {"label": "DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
   # copies of DYIncNLO with different colors and labels
   "DYGenNLO" : {"label": r"$Z{\rightarrow}{\tau_\mu}{\tau_h}$", "color": color_dictionary["DYGen"], "plot_scaling" : 1},
   "DYLepNLO" : {"label": r"$Z{\rightarrow}ll, l{\rightarrow}{\tau_h}$", "color": color_dictionary["DYLep"], "plot_scaling" : 1},
   "DYJetNLO" : {"label": r"$DY, j{\rightarrow}{\tau_h}$", "color": color_dictionary["DYJet"], "plot_scaling" : 1},
-  "DYGen10to50NLO"    : {"label": r"$Z{\rightarrow}{\tau_\mu}{\tau_h}$", "color": color_dictionary["DYGen"], "plot_scaling" : 1},
-  "DYLep10to50NLO"    : {"label": r"$Z{\rightarrow}ll, l{\rightarrow}{\tau_h}$", "color": color_dictionary["DYLep"], "plot_scaling" : 1},
-  "DYJet10to50NLO"    : {"label": r"$DY, j{\rightarrow}{\tau_h}$", "color": color_dictionary["DYJet"], "plot_scaling" : 1},
 
-  "DY0JNLO"    : {"label": r"DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
-  "DY1JNLO"    : {"label": r"DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
-  "DY2JNLO"    : {"label": r"DY", "color": color_dictionary["DY"], "plot_scaling" : 1},
+
 
   "TTTo2L2Nu"          : {"label": "TT", "color": color_dictionary["TT"], "plot_scaling" : 1},
   "TTToFullyHadronic"  : {"label": "TT", "color": color_dictionary["TT"], "plot_scaling" : 1},
@@ -126,15 +117,52 @@ MC_dictionary = {
   "ZZTo2Nu2Q"          : {"label": "VV", "color": color_dictionary["VV"], "plot_scaling" : 1},
   "ZZTo4L"             : {"label": "VV", "color": color_dictionary["VV"], "plot_scaling" : 1},
 
-  #"ggH_WW"             : {"XSec": XSec["ggH_WW"], "NWEvents": 1, 
-  #                        "label": "VV", "color": color_dictionary["VV"], "plot_scaling" : 1},
-  #"VBF_WW"             : {"XSec": XSec["VBF_WW"], "NWEvents": 1, 
-  #                        "label": "VV", "color": color_dictionary["VV"], "plot_scaling" : 1},
-  #"ttH_WW"             : {"XSec": XSec["ttH_WW"], "NWEvents": 1, 
-  #                        "label": "VV", "color": color_dictionary["VV"], "plot_scaling" : 1},
+  "ggH_WW"       : {"XSec": XSec["ggH_WW"], "NWEvents": 1,
+                    "label": "VV", "color": color_dictionary["VV"],
+                    "plot_scaling" : 1},
 
-  # XSecMCweight is defined here for JetFakes process because it isn't set autmatically elsewhere
-  "myQCD"              : {"label": "Jet Fakes", "color": color_dictionary["QCD"], "plot_scaling" : 1, "XSecMCweight" : 1},
+  "ttH_WW"        : {"XSec": XSec["ttH_nonbb"], "NWEvents": 1,
+                    "label": "VV", "color": color_dictionary["VV"],
+                    "plot_scaling" : 1},
+
+  "VBF_WW"        : {"XSec": XSec["VBF_WW"], "NWEvents": 1,
+                    "label": "VV", "color": color_dictionary["VV"],
+                    "plot_scaling" : 1},
+
+  "myQCD"   : {"XSec": 1, "NWEvents": 1,
+             "label": "Jet Fakes", "color": color_dictionary["QCD"],
+             "plot_scaling" : 1, "XSecMCweight" : 1},  # dummy value for MCweight
+
+  "QCD_HT-70to100"    : {"XSec": XSec["QCD_HT-70to100"],    "NWEvents": 1.973e+16, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-100to200"   : {"XSec": XSec["QCD_HT-100to200"],   "NWEvents": 1.142e+16, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-200to400"   : {"XSec": XSec["QCD_HT-200to400"],   "NWEvents": 1.208e+15, # branch value
+                       "label": "MC QCD", "color": color_dictionary["QCD"],
+                       "plot_scaling" : 1},
+  "QCD_HT-400to600"   : {"XSec": XSec["QCD_HT-400to600"],   "NWEvents": 7.184e+13, # branch value
+                       "label": "MC QCD", "color": color_dictionary["QCD"],
+                       "plot_scaling" : 1},
+  "QCD_HT-600to800"   : {"XSec": XSec["QCD_HT-600to800"],   "NWEvents": 1.019e+13, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-800to1000"  : {"XSec": XSec["QCD_HT-800to1000"],  "NWEvents": 2.530e+12, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-1000to1200" : {"XSec": XSec["QCD_HT-1000to1200"], "NWEvents": 8.112e+11, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-1200to1500" : {"XSec": XSec["QCD_HT-1200to1500"], "NWEvents": 3.579e+11, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-1500to2000" : {"XSec": XSec["QCD_HT-1500to2000"], "NWEvents": 1.063e+11, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
+  "QCD_HT-2000"       : {"XSec": XSec["QCD_HT-2000"],       "NWEvents": 2.274e+10, # branch value
+                         "label": "MC QCD", "color": color_dictionary["QCD"],
+                         "plot_scaling" : 1},
 
   "QCD_HT-70to100"     : {"label": "MC QCD", "color": color_dictionary["QCD"], "plot_scaling" : 1},
   "QCD_HT-100to200"    : {"label": "MC QCD", "color": color_dictionary["QCD"], "plot_scaling" : 1},

@@ -74,7 +74,6 @@ def attention(input_string, log_file):
 def make_directory(directory_name, testing=False):
   date_and_time  = datetime.now(timezone.utc).strftime('from_%d-%m_at_%H%M')
   directory_name = directory_name + "_" + date_and_time
-  #directory_name = directory_name # TODO: uncomment above line
   if testing: directory_name += "_testing"
   if not path.isdir(directory_name):
     makedirs(directory_name)
@@ -91,7 +90,7 @@ def print_setup_info(setup):
   
   testing, final_state_mode, jet_mode, era, lumi = setup.state_info
   using_directory, plot_dir, log_file, use_NLO, file_map = setup.file_info
-  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode, _, _ = setup.misc_info
+  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode = setup.misc_info
 
   screen_width, spacer = SCREEN_WIDTH, SPACER
   attention(final_state_mode, log_file)

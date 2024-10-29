@@ -7,13 +7,14 @@ from calculate_functions  import highest_mjj_pair, return_TLorentz_Jets
 from utility_functions    import text_options, log_print
 
 from cut_ditau_functions  import make_ditau_cut 
-from cut_mutau_functions  import make_mutau_cut
+from cut_mutau_functions  import make_mutau_cut, make_mutau_TnP_cut
 from cut_etau_functions   import make_etau_cut
 from cut_dimuon_functions import make_dimuon_cut, manual_dimuon_lepton_veto
+from cut_emu_functions   import make_emu_cut
  
-from FF_functions         import make_ditau_SR_cut, make_mutau_SR_cut, make_etau_SR_cut
-from FF_functions         import make_ditau_AR_cut, make_mutau_AR_cut, make_etau_AR_cut
-from FF_functions         import add_FF_weights
+from FF_functions         import make_ditau_SR_cut, make_mutau_SR_cut, make_etau_SR_cut, make_emu_SR_cut
+from FF_functions         import make_ditau_AR_cut, make_mutau_AR_cut, make_etau_AR_cut, make_emu_AR_cut
+from FF_functions         import add_FF_weights, apply_FF_weight_from_branch
 
 from file_functions       import load_and_store_NWEvents, customize_DY
 from plotting_functions   import final_state_vars, clean_jet_vars
@@ -75,7 +76,6 @@ def append_flavor_indices(event_dictionary, final_state_mode, keep_fakes=False):
         lep_fake = True
         event_flavor.append("L")
 
-    # TODO: Braden I don't think this is gen-matching
     else:
       print(f"No gen matching for that final state ({final_state_mode}), no branches appended")
       return event_dictionary
@@ -103,9 +103,7 @@ def append_flavor_indices(event_dictionary, final_state_mode, keep_fakes=False):
 
 def make_jet_cut(event_dictionary, jet_mode):
   nEvents_precut = len(event_dictionary["Lepton_pt"])
-  unpack_jetVars = ["nCleanJet", "CleanJet_pt", "CleanJet_eta", "CleanJet_phi", "CleanJet_mass", 
-                    #"HTT_DiJet_j1index", "HTT_DiJet_j2index",]
-                   ]
+  unpack_jetVars = ["nCleanJet", "CleanJet_pt", "CleanJet_eta", "CleanJet_phi", "CleanJet_mass"]
   unpack_jetVars = (event_dictionary.get(key) for key in unpack_jetVars)
   to_check = [range(len(event_dictionary["Lepton_pt"])), *unpack_jetVars] # "*" unpacks a tuple
   nCleanJetGT30, pass_0j_cuts, pass_1j_cuts, pass_2j_cuts, pass_3j_cuts = [], [], [], [], []
@@ -114,10 +112,8 @@ def make_jet_cut(event_dictionary, jet_mode):
   CleanJetGT30_eta_1, CleanJetGT30_eta_2, CleanJetGT30_eta_3 = [], [], []
   CleanJetGT30_phi_1, CleanJetGT30_phi_2, CleanJetGT30_phi_3 = [], [], []
   mjj_array, detajj_array = [], []
-  j1_idxs_array, j2_idxs_array, dijet_idxs_array_calc, dijet_idxs_array_HTT = [], [], [], []
   from ROOT import TLorentzVector 
   # TODO : this is the only place ROOT is used, removing it would speed things up
-  #for i, nJet, jet_pt, jet_eta, jet_phi, jet_mass, HTT_j1idx, HTT_j2idx in zip(*to_check):
   for i, nJet, jet_pt, jet_eta, jet_phi, jet_mass in zip(*to_check):
     passingJets = 0
     passingJetsPt, passingJetsEta, passingJetsPhi, passingJetsMass = [], [], [], []
@@ -150,6 +146,8 @@ def make_jet_cut(event_dictionary, jet_mode):
       CleanJetGT30_phi_1.append(passingJetsPhi[j1_idx])
       CleanJetGT30_phi_2.append(passingJetsPhi[j2_idx])
       mjj_array.append(mjj)
+      #mjj_array.append((j1_TVec + j2_TVec).M())
+      # TODO can try to make the comparison here
       detajj_array.append(abs(j1_TVec.Eta() - j2_TVec.Eta()))
 
     if (passingJets >= 2) and (jet_mode == "GTE2j"): 
@@ -163,11 +161,8 @@ def make_jet_cut(event_dictionary, jet_mode):
       CleanJetGT30_phi_1.append(passingJetsPhi[j1_idx])
       CleanJetGT30_phi_2.append(passingJetsPhi[j2_idx])
       mjj_array.append(mjj)
+      #mjj_array.append((j1_TVec+j2_TVec).M())
       detajj_array.append(abs(j1_TVec.Eta()-j2_TVec.Eta()))
-      j1_idxs_array.append(j1_idx)
-      j2_idxs_array.append(j2_idx)
-      dijet_idxs_array_calc.append(j1_idx*10+j2_idx) 
-      #dijet_idxs_array_HTT.append(HTT_j1idx*10+HTT_j2idx)
 
     if (passingJets >= 1) and (jet_mode == "GTE1j"): 
       pass_GTE1j_cuts.append(i)
@@ -181,6 +176,7 @@ def make_jet_cut(event_dictionary, jet_mode):
         CleanJetGT30_phi_1.append(passingJetsPhi[j1_idx])
         CleanJetGT30_phi_2.append(passingJetsPhi[j2_idx])
         mjj_array.append(mjj)
+        #mjj_array.append((j1_TVec+j2_TVec).M())
         detajj_array.append(abs(j1_TVec.Eta()-j2_TVec.Eta()))
       else:
         CleanJetGT30_pt_1.append(passingJetsPt[0])
@@ -239,10 +235,6 @@ def make_jet_cut(event_dictionary, jet_mode):
     #event_dictionary["CleanJetGT30_phi_3"] = np.array(CleanJetGT30_phi_3)
     event_dictionary["FS_mjj"] = np.array(mjj_array)
     event_dictionary["FS_detajj"] = np.array(detajj_array)
-    event_dictionary["FS_j1index"] = np.array(j1_idxs_array)
-    event_dictionary["FS_j2index"] = np.array(j2_idxs_array)
-    #event_dictionary["FS_dijet_pair_calc"] = np.array(dijet_idxs_array_calc)
-    #event_dictionary["FS_dijet_pair_HTT"]  = np.array(dijet_idxs_array_HTT)
 
   elif jet_mode == "GTE1j":
     event_dictionary["pass_GTE1j_cuts"]    = np.array(pass_GTE1j_cuts)
@@ -286,22 +278,12 @@ def apply_cut(event_dictionary, cut_branch, protected_branches=[]):
     if delete_sample:
       pass
 
-    # TODO: fix this
-    # special handling, will need to be adjusted by hand for exactly 2j or 3j studies
-    # this only works for GTE2j, not Inclusive because the "apply_cut" method for jets is never called there
-    #if (("pass_GTE2j_cuts" in event_dictionary) and ("dijet" in branch.lower())):
-    if (("pass_GTE2j_cuts" in event_dictionary) and ("dijet" in branch.lower()) and (branch != "FS_dijet_pair_calc")):
-    #if (("pass_GTE2j_cuts" in event_dictionary) and ("dijet" in branch.lower()) and (branch not in protected_branches)):
-      print("very special GTE2j handling underway") # DEBUG
-      print(branch)
-      cut_len    = len(event_dictionary["pass_GTE2j_cuts"])
-      branch_len = len(event_dictionary[branch])
-      print(f" pass_GTE2j_cuts len : {cut_len}")
-      print(f" branch len          : {branch_len}")
-      if ( cut_len == branch_len):
-        pass
-      else:
-        event_dictionary[branch] = np.take(event_dictionary[branch], event_dictionary["pass_GTE2j_cuts"])
+    # special handling, will need to be adjusted by hand for excatly 2j or 3j studies # DEBUG
+    # this only works for GTE2j, not Inclusive because the "apply_cut" method for jets is never called there # DEBUG
+    if (("pass_GTE2j_cuts" in event_dictionary) and
+        (branch == "HTT_DiJet_dEta_fromHighestMjj" or branch == "HTT_DiJet_MassInv_fromHighestMjj")):
+      #print("very special GTE2j handling underway") # DEBUG
+      event_dictionary[branch] = np.take(event_dictionary[branch], event_dictionary["pass_GTE2j_cuts"])
       #if (branch == "CleanJetGT30_pt_3" or branch == "CleanJetGT30_eta_3"):
       #  event_dictionary[branch] = np.take(event_dictionary[branch], event_dictionary["pass_3j_cuts"])
 
@@ -355,12 +337,12 @@ def apply_final_state_cut(event_dictionary, final_state_mode, DeepTau_version, u
     if (event_dictionary == None): return event_dictionary
     event_dictionary = make_mutau_cut(event_dictionary, DeepTau_version)
     event_dictionary = apply_cut(event_dictionary, "pass_cuts", protected_branches)
-  #elif final_state_mode == "mutau_TnP": # special mode for Tau TRG studies
-  #  event_dictionary = make_mutau_SR_cut(event_dictionary, DeepTau_version)
-  #  event_dictionary = apply_cut(event_dictionary, "pass_SR_cuts", protected_branches)
-  #  if (event_dictionary == None): return event_dictionary
-  #  event_dictionary = make_mutau_TnP_cut(event_dictionary, DeepTau_version)
-  #  event_dictionary = apply_cut(event_dictionary, "pass_cuts", protected_branches)
+  elif final_state_mode == "mutau_TnP": # special mode for Tau TRG studies
+    event_dictionary = make_mutau_SR_cut(event_dictionary, DeepTau_version)
+    event_dictionary = apply_cut(event_dictionary, "pass_SR_cuts", protected_branches)
+    if (event_dictionary == None): return event_dictionary
+    event_dictionary = make_mutau_TnP_cut(event_dictionary, DeepTau_version)
+    event_dictionary = apply_cut(event_dictionary, "pass_cuts", protected_branches)
   elif final_state_mode == "etau":
     event_dictionary = make_etau_SR_cut(event_dictionary, DeepTau_version)
     event_dictionary = apply_cut(event_dictionary, "pass_SR_cuts", protected_branches)
@@ -378,6 +360,13 @@ def apply_final_state_cut(event_dictionary, final_state_mode, DeepTau_version, u
     if (useMiniIso == True):
       event_dictionary = make_dimuon_cut(event_dictionary, useMiniIso==True)
       event_dictionary = apply_cut(event_dictionary, "pass_cuts", protected_branches)
+
+  elif final_state_mode == "emu":
+    event_dictionary = make_emu_SR_cut(event_dictionary)
+    event_dictionary = apply_cut(event_dictionary, "pass_SR_cuts", protected_branches)
+    if (event_dictionary == None): return event_dictionary
+    event_dictionary = make_emu_cut(event_dictionary)
+    event_dictionary = apply_cut(event_dictionary, "pass_cuts", protected_branches)
   else:
     print(f"No cuts to apply for {final_state_mode} final state.")
   return event_dictionary
@@ -442,6 +431,7 @@ def apply_HTT_FS_cuts_to_process(process, process_dictionary, log_file,
       #append_Zpt_weight(process_events)
     keep_fakes = False
     #keep_fakes = True # TODO : fix this block
+    #'''
     if ((("TT" in process) or ("WJ" in process) or ("DY" in process)) and ("mutau" in final_state_mode)):
       # when FF method is finished/improved no longer need to keep TT and WJ fakes
       keep_fakes = True
@@ -451,7 +441,11 @@ def apply_HTT_FS_cuts_to_process(process, process_dictionary, log_file,
     #if ((("TT" in process) or ("WJ" in process) or ("DY" in process)) and ("ditau" in final_state_mode)):
     if ( (("DY" in process) or ("QCD" in process)) and (final_state_mode=="ditau")):
       keep_fakes = True
-    #print("KEEPING ALL FAKES!") #DEBUG
+    if ((("TT" in process) or ("WJ" in process) or ("DY" in process)) and ("emu" in final_state_mode)):
+      # when FF method is finished/improved no longer need to keep TT and WJ fakes
+      keep_fakes = True
+    
+    #Uncomment for etau and mutau and ditau
     process_events = append_flavor_indices(process_events, final_state_mode, keep_fakes=keep_fakes)
     process_events = apply_cut(process_events, "pass_gen_cuts", protected_branches=protected_branches)
     if (process_events==None or len(process_events["run"])==0): return None
@@ -552,6 +546,9 @@ def apply_AR_cut(process, event_dictionary, final_state_mode, jet_mode, semilep_
       keep_fakes = True
     if (("DY" in process) and (final_state_mode=="ditau")):
       keep_fakes = True
+    if ((("TT" in process) or ("WJ" in process) or ("DY" in process)) and (final_state_mode=="emu")):
+      # when FF method is finished/improved no longer need to keep TT and WJ fakes
+      keep_fakes = True
     process_events = append_flavor_indices(process_events, final_state_mode, keep_fakes=keep_fakes)
     process_events = apply_cut(process_events, "pass_gen_cuts", protected_branches=protected_branches)
     if (process_events==None or len(process_events["run"])==0): return None
@@ -571,6 +568,13 @@ def apply_AR_cut(process, event_dictionary, final_state_mode, jet_mode, semilep_
       event_dictionary = apply_cut(event_dictionary, "pass_AR_cuts", protected_branches)
       event_dictionary = apply_jet_cut(event_dictionary, jet_mode)
       event_dictionary = make_etau_cut(event_dictionary, DeepTau_version, skip_DeepTau=True)
+    if (final_state_mode == "emu"):
+      event_dictionary = make_emu_AR_cut(event_dictionary, iso_region_el=True, iso_region_mu=True)
+      event_dictionary = apply_cut(event_dictionary, "pass_AR_cuts", protected_branches)
+      event_dictionary = apply_jet_cut(event_dictionary, jet_mode)
+      event_dictionary = make_emu_cut(event_dictionary, DeepTau_version, skip_DeepTau=True)
+      print(len(event_dictionary['FFweight']))
+      event_dictionary = apply_FF_weight_from_branch(event_dictionary)
     protected_branches = set_protected_branches(final_state_mode=final_state_mode, jet_mode="none")
     event_dictionary   = apply_cut(event_dictionary, "pass_cuts", protected_branches)
     # weights associated with jet_mode key (testing suffix automatically removed)

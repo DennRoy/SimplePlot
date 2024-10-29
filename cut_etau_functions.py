@@ -26,14 +26,24 @@ def make_etau_cut(event_dictionary, DeepTau_version, skip_DeepTau=False):
       el_dxy, el_dz, el_chg, tau_dxy, tau_dz, tau_chg, tau_decayMode,\
       MET_pt, MET_phi, tau_idx, el_idx,\
       l1_idx, l2_idx, btag,\
-      vJet, vMu, vEle, trg32el, trg35el, crosstrg in zip(*to_check):
+      vJet, vMu, vEle, trg30el, trg32el, trg35el, crosstrg in zip(*to_check):
 
-    # in ETau, electron is always lepton 1 in FS branches, tau is always lepton 2
-
-    elFSLoc      = l1_idx
-    elBranchLoc  = el_idx[l1_idx]
-    tauFSLoc     = l2_idx
-    tauBranchLoc = tau_idx[l2_idx]
+    # some handling to figure out which FS index applies to what lepton
+    # note for the DeepTauID we use the tau branch index directly instead of the lepton branch
+    # (for tau branches we need the tau_idx, for lepton branches we can simply use the l1_idx, l2_idx)
+    tauFSLoc, tauBranchLoc, elFSLoc, elBranchLoc = 999, 999, 999, 999
+    if (tau_idx[l1_idx] != -1 and el_idx[l2_idx] != -1):
+      tauFSLoc = l1_idx
+      tauBranchLoc = tau_idx[l1_idx]
+      elFSLoc  = l2_idx
+      elBranchLoc = el_idx[l2_idx]
+    elif (tau_idx[l2_idx] != -1 and el_idx[l1_idx] != -1):
+      tauFSLoc = l2_idx
+      tauBranchLoc = tau_idx[l2_idx]
+      elFSLoc  = l1_idx
+      elBranchLoc = el_idx[l1_idx]
+    else:
+      print("Should not print :)")
 
     elPtVal    = lep_pt[elFSLoc] 
     elEtaVal   = lep_eta[elFSLoc]
@@ -51,8 +61,9 @@ def make_etau_cut(event_dictionary, DeepTau_version, skip_DeepTau=False):
     mtVal      = calculate_mt(elPtVal, elPhiVal, MET_pt, MET_phi)
 
     passTauPtAndEta  = ((tauPtVal > 30.0) and (abs(tauEtaVal) < 2.5))
-    pass33ElPt   = ((trg32el) and (elPtVal > 33.0) and (abs(elEtaVal) < 2.1))
-    pass36ElPt   = ((trg35el) and (elPtVal > 36.0) and (abs(elEtaVal) < 2.1))
+    pass31ElPt   = ((trg30el) and (elPtVal > 31.0) and (abs(elEtaVal) < 2.5))
+    pass33ElPt   = ((trg32el) and (elPtVal > 33.0) and (abs(elEtaVal) < 2.5))
+    pass36ElPt   = ((trg35el) and (elPtVal > 36.0) and (abs(elEtaVal) < 2.5))
     # upper bound on cross trigger will change if lower single electron trigger included
     # HLT_Ele24_eta2p1_WPTight_Gsf_LooseDeepTauPFTauHPS30_eta2p1_CrossL1
     passElPtCrossTrigger = ((crosstrg) and ((25.0 < elPtVal < 33.0) and (abs(elEtaVal) < 2.1))
@@ -76,8 +87,9 @@ def make_etau_cut(event_dictionary, DeepTau_version, skip_DeepTau=False):
     #if (abs(elEtaVal) < 1.5):
     #  pass33ElPt, pass36ElPt, passElPtCrossTrigger = False, False, False
     #if (passTauPtAndEta and (pass33ElPt or pass36ElPt or passElPtCrossTrigger) and passTauDTLep and restrict_tau_DM):
-    if (passTauPtAndEta and (pass33ElPt or pass36ElPt or passElPtCrossTrigger) and passTauDTLep):
-    #if (passTauPtAndEta and (pass33ElPt or pass36ElPt) and passTauDTLep):
+    #if (passTauPtAndEta and (pass33ElPt or pass36ElPt or passElPtCrossTrigger) and passTauDTLep):
+
+    if (passTauPtAndEta and (pass33ElPt or pass36ElPt or pass31ElPt or passElPtCrossTrigger) and passTauDTLep):
       pass_cuts.append(i)
       FS_el_pt.append(elPtVal)
       FS_el_eta.append(elEtaVal)
@@ -168,8 +180,8 @@ def make_etau_region(event_dictionary, new_branch_name, FS_pair_sign, pass_el_is
       if (value > 0): passBTag = False
 
     if ( (np.sign(signed_pdgId) == FS_pair_sign) and 
-         (pass_el_iso == pass_el_iso_req) and (pass_DeepTau == pass_DeepTau_req) and 
-         (passMT == pass_mt_req) and (passBTag == pass_BTag_req) ):
+         (pass_el_iso == pass_el_iso_req) and (pass_DeepTau == pass_DeepTau_req) and (passMT == pass_mt_req) ):
+#         (passMT == pass_mt_req) and (passBTag == pass_BTag_req) ):
       pass_cuts.append(i)
     
   event_dictionary[new_branch_name] = np.array(pass_cuts)

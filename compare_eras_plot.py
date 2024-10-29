@@ -95,6 +95,7 @@ if __name__ == "__main__":
     elif final_state_mode == "mutau"  and ("Tau" in process  or "Electron" in process): continue
     elif final_state_mode == "etau"   and ("Tau" in process  or "Muon" in process):     continue
     elif final_state_mode == "dimuon" and not ("Muon" in process or "DY" in process):   continue
+    elif final_state_mode == "emu" and not ("Muon" in process or "DY" in process):      continue
 
     new_process_dictionary = load_process_from_file(process, using_directory, file_map,
                                               branches, good_events, final_state_mode,

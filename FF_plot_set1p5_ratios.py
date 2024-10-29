@@ -8,26 +8,61 @@ import gc
 import copy
 from iminuit import Minuit
 from iminuit.cost import LeastSquares
+'''
+# explicitly import used functions from user files, grouped roughly by call order and relatedness
+from file_map_dictionary   import testing_file_map, full_file_map
+from file_functions        import load_process_from_file, append_to_combined_processes, sort_combined_processes
+
+from luminosity_dictionary import luminosities_with_normtag as luminosities
+
+from setup import setup_handler, set_good_events
+from cut_and_study_functions import apply_HTT_FS_cuts_to_process, set_protected_branches
+from branch_functions import set_branches
+from plotting_functions import set_vars_to_plot
+from file_map_dictionary import set_dataset_info
+#from cut_and_study_functions import apply_HTT_FS_cuts_to_process, apply_AR_cut
+#from cut_and_study_functions import append_lepton_indices, apply_cut, apply_jet_cut, add_FF_weights
+#from cut_and_study_functions import load_and_store_NWEvents, customize_DY, append_flavor_indices, set_protected_branches
+
+from plotting_functions    import get_binned_data, get_binned_backgrounds, get_binned_signals
+from plotting_functions    import setup_ratio_plot, make_ratio_plot, spruce_up_plot, spruce_up_legend
+from plotting_functions    import plot_data, plot_MC, plot_signal, make_bins
+
+from plotting_functions import get_midpoints, setup_single_plot, spruce_up_single_plot
+
+from calculate_functions   import calculate_signal_background_ratio, yields_for_CSV
+from utility_functions     import time_print, make_directory, print_setup_info, log_print
+
+
+from cut_ditau_functions import make_ditau_cut
+from cut_mutau_functions import make_mutau_cut
+#from FF_functions import *
+
+from binning_dictionary import label_dictionary
+'''
+
+
 # explicitly import used functions from user files, grouped roughly by call order and relatedness
 # import statements for setup
 from setup import setup_handler, set_good_events
 from branch_functions import set_branches
 from plotting_functions import set_vars_to_plot
 from file_map_dictionary import set_dataset_info
-
 # import statements for data loading and processing
 from file_functions        import load_process_from_file, append_to_combined_processes, sort_combined_processes
 from FF_functions        import set_JetFakes_process
 from cut_and_study_functions import apply_HTT_FS_cuts_to_process
-from cut_and_study_functions import apply_cut, apply_jet_cut, set_protected_branches
+from cut_and_study_functions import apply_cut, set_protected_branches
+
 
 # plotting
+from plotting_functions import get_midpoints, make_eta_phi_plot
 from luminosity_dictionary import luminosities_with_normtag as luminosities
-from plotting_functions    import get_midpoints, make_eta_phi_plot
-from plotting_functions    import get_binned_data, get_binned_backgrounds, get_binned_signals, get_summed_backgrounds
+from plotting_functions    import get_binned_data, get_binned_backgrounds, get_binned_signals
 from plotting_functions    import setup_ratio_plot, make_ratio_plot, spruce_up_plot, spruce_up_legend
 from plotting_functions    import setup_single_plot, spruce_up_single_plot
-from plotting_functions    import plot_data, plot_MC, plot_signal, make_bins, make_pie_chart, plot_raw
+from plotting_functions    import plot_data, plot_MC, plot_signal, make_bins, make_pie_chart
+
 
 from binning_dictionary import label_dictionary
 
@@ -80,8 +115,9 @@ def subtract_data_MC(semilep_mode, h_num_data, h_num_backgrounds, h_num_summed_b
     '''
     num = numerator, den = denominator
     '''
-    h_num_data_m_MC = h_num_data["Data"]["BinnedEvents"] - h_num_summed_backgrounds["Bkgd"]["BinnedEvents"]
-    h_den_data_m_MC = h_den_data["Data"]["BinnedEvents"] - h_den_summed_backgrounds["Bkgd"]["BinnedEvents"]
+    
+    h_num_data_m_MC = h_num_data - h_num_summed_backgrounds
+    h_den_data_m_MC = h_den_data - h_den_summed_backgrounds
 
     if (semilep_mode == "QCD"):
       pass
@@ -138,13 +174,86 @@ if __name__ == "__main__":
   setup = setup_handler()
   testing, final_state_mode, jet_mode, era, lumi = setup.state_info
   using_directory, plot_dir, log_file, use_NLO, file_map = setup.file_info
-  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode, _ = setup.misc_info
+  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode = setup.misc_info
 
+ 
   print_setup_info(setup)
 
+  # add FF weights :) # almost the same as SR, except SS and 1st tau fails iso (applied in AR_cuts)
+
   do_QCD = do_JetFakes
+  '''
+  import argparse 
+  parser = argparse.ArgumentParser(description='Make a standard Data-MC agreement plot.')
+  # store_true : when the argument is supplied, store it's value as true
+  # for 'testing' below, the default value is false if the argument is not specified
+  parser.add_argument('--testing',     dest='testing',     default=False,       action='store_true')
+  parser.add_argument('--hide_plots',  dest='hide_plots',  default=False,       action='store_true')
+  parser.add_argument('--hide_yields', dest='hide_yields', default=False,       action='store_true')
+  parser.add_argument('--final_state', dest='final_state', default="mutau",     action='store')
+  parser.add_argument('--plot_dir',    dest='plot_dir',    default="plots",     action='store')
+  parser.add_argument('--lumi',        dest='lumi',        default="2022 EFG",  action='store')
+  parser.add_argument('--jet_mode',    dest='jet_mode',    default="Inclusive", action='store')
+  parser.add_argument('--DeepTau',     dest='DeepTau_version', default="2p5",   action='store')
+  parser.add_argument('--use_DY_NLO',  dest='use_DY_NLO',  default=True,        action='store')
+
+  args = parser.parse_args() 
+  testing     = args.testing     # False by default, do full dataset unless otherwise specified
+  hide_plots  = args.hide_plots  # False by default, show plots unless otherwise specified
+  hide_yields = args.hide_yields # False by default, show yields unless otherwise specified
+  use_DY_NLO  = args.use_DY_NLO  # True  by default, use LO DY if False
+  lumi = luminosities["2022 G"] if testing else luminosities[args.lumi]
+  DeepTau_version = args.DeepTau_version # default is 2p5 [possible values 2p1 and 2p5]
+
+  # final_state_mode affects many things automatically, including good_events, datasets, plotting vars, etc.
+  final_state_mode = args.final_state # default mutau [possible values ditau, mutau, etau, dimuon]
+  jet_mode         = args.jet_mode # default Inclusive [possible values 0j, 1j, 2j, GTE2j]
+
+  #lxplus_redirector = "root://cms-xrd-global.cern.ch//"
+  eos_user_dir    = "/eos/user/b/ballmond/NanoTauAnalysis/analysis/HTauTau_2022_fromstep1_skimmed/" + final_state_mode
+  # there's no place like home :)
+  home_dir        = "/Users/ballmond/LocalDesktop/HiggsTauTau/Run3PreEEFSSplitSamples/" + final_state_mode
+  era_modifier_2022 = "preEE" if (("C" in args.lumi) or ("D" in args.lumi)) else "postEE"
+  home_dir        = "/Users/ballmond/LocalDesktop/HiggsTauTau/V12_PFRel_"+era_modifier_2022+"_Run3FSSplitSamples/" + final_state_mode
+  using_directory = home_dir
+ 
+  good_events  = set_good_events(final_state_mode)
+  branches     = set_branches(final_state_mode, DeepTau_version)
+  vars_to_plot = set_vars_to_plot(final_state_mode, jet_mode=jet_mode)
+  plot_dir_name = "FS_plots_testing/" if testing==True else "FS_plots/"
+  plot_dir = make_directory(plot_dir_name+args.plot_dir, final_state_mode+"_"+jet_mode, testing=testing)
+
+  log_file = open('outputfile.log', 'w')
+  # show info to user
+  print_setup_info(final_state_mode, lumi, jet_mode, testing, DeepTau_version,
+                   using_directory, plot_dir,
+                   good_events, branches, vars_to_plot, log_file)
+
+  file_map = testing_file_map if testing else full_file_map
+  if (use_DY_NLO == True): 
+    file_map.pop("DYInc")
+    file_map.pop("WJetsInc")
+  else: 
+    file_map.pop("DYIncNLO")
+    file_map.pop("WJetsIncNLO")
+
+  common_selection = "(METfilters) & (LeptonVeto==0) & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV)"
+  ditau_selection  = common_selection + " & (abs(HTT_pdgId)==15*15) & (Trigger_ditau)"
+  mutau_selection  = common_selection + " & (abs(HTT_pdgId)==13*15) & (Trigger_mutau)"
+  final_state_selection_dict = {"ditau": ditau_selection, "mutau" : mutau_selection}
+  base_selection = final_state_selection_dict[final_state_mode]
+
+  dataset_dictionary = {"ditau" : "DataTau", "mutau" : "DataMuon", "etau" : "DataElectron", "emu" : "DataEMu"}
+  reject_dataset_dictionary = {"ditau" : ["DataMuon", "DataElectron", "DataEMu"],
+                               "mutau" : ["DataTau",  "DataElectron", "DataEMu"],
+                               "etau"  : ["DataMuon", "DataTau",      "DataEMu"],
+                               "emu"   : ["DataMuon", "DataElectron", "DataTau"]}
+
+  dataset = dataset_dictionary[final_state_mode]
+  reject_datasets = reject_dataset_dictionary[final_state_mode]
+  '''
   _, reject_datasets = set_dataset_info(final_state_mode)
-  good_events  = set_good_events(final_state_mode, AR_region=True) 
+  good_events  = set_good_events(final_state_mode) 
  
   store_region_data_dictionary = {}
   store_region_bkgd_dictionary = {}
@@ -189,7 +298,6 @@ if __name__ == "__main__":
       if (event_dictionary==None or len(event_dictionary["run"])==0): continue
 
       if (final_state_mode == "ditau"):
-        from cut_ditau_functions  import make_ditau_cut 
         event_dictionary   = make_ditau_cut(event_dictionary, DeepTau_version) # no DeepTau or Charge requirements
         if (event_dictionary==None or len(event_dictionary["run"])==0): continue
 
@@ -299,10 +407,10 @@ if __name__ == "__main__":
     if "HTT_m_vis" in var: var = "HTT_m_vis"
     h_numerator_data = get_binned_data(final_state_mode, testing, numerator_data, var, xbins, lumi)
     h_denominator_data = get_binned_data(final_state_mode, testing, denominator_data, var, xbins, lumi)
-    h_numerator_backgrounds          = get_binned_backgrounds(final_state_mode, testing, numerator_bkgd, var, xbins, lumi)
-    h_numerator_summed_backgrounds   = get_summed_backgrounds(h_numerator_backgrounds)
-    h_denominator_backgrounds        = get_binned_backgrounds(final_state_mode, testing, denominator_bkgd, var, xbins, lumi)
-    h_denominator_summed_backgrounds = get_summed_backgrounds(h_denominator_backgrounds)
+    h_numerator_backgrounds, h_numerator_summed_backgrounds = get_binned_backgrounds(final_state_mode, testing, 
+                                                                 numerator_bkgd, var, xbins, lumi)
+    h_denominator_backgrounds, h_denominator_summed_backgrounds = get_binned_backgrounds(final_state_mode, testing, 
+                                                                     denominator_bkgd, var, xbins, lumi)
     var = temp_var
 
     h_num_data_m_MC, h_den_data_m_MC = subtract_data_MC(semilep_mode, 
@@ -314,16 +422,15 @@ if __name__ == "__main__":
     title = f"{title_era}, {lumi:.2f}" + r"$fb^{-1}$"
 
     # plot everything :)
-    plot_raw(ax_compare, xbins, h_num_data_m_MC, lumi, color="grey", label=f"{numerator} : Data-MC")
-    plot_raw(ax_compare, xbins, h_den_data_m_MC, lumi, color="blue",  label=f"{denominator} : Data-MC")
+    plot_data(ax_compare, xbins, h_num_data_m_MC, lumi, color="grey", label=f"{numerator} : Data-MC")
+    plot_data(ax_compare, xbins, h_den_data_m_MC, lumi, color="blue",  label=f"{denominator} : Data-MC")
     spruce_up_single_plot(ax_compare, label_dictionary[var], "Events", title, final_state_mode, jet_mode)
     plt.savefig(plot_dir + "/" + str(var) + "_" + str(region) + ".png")
 
     FF_ratio, FF_ratio_err = make_ratio_plot(ax_ratio, xbins, 
-                             h_num_data_m_MC, "Data", np.ones(np.shape(h_num_data_m_MC)),
-                             h_den_data_m_MC, "Data", np.ones(np.shape(h_den_data_m_MC)),
-                             no_plot=False, label=f"{numerator} / {denominator}")
-
+                                  h_num_data_m_MC, "Data", np.ones(np.shape(h_num_data_m_MC)),
+                                  h_den_data_m_MC, "Data", np.ones(np.shape(h_den_data_m_MC)),
+                                  no_midpoints = True, label=f"{numerator} / {denominator}")
 
     silly_zeros = mask_zeros(FF_ratio)
     midpoints = get_midpoints(xbins)
@@ -336,16 +443,38 @@ if __name__ == "__main__":
 
     if (var == "FS_t1_pt") or (var == "FS_tau_pt"): # FS_tau_pt belongs to mutau/etau, FS_t1_pt is ditau
 
+      '''
+      temp_bins = xbins
+      while iteration < 10:
+        num_data_m_MC, den_data_m_MC = quick_rebin(h_numerator_data, h_denominator_data,
+                                                   h_numerator_backgrounds, h_denominator_backgrounds,
+                                                   var, temp_bins, lumi, semilep_mode, underflow=True):
+
+        num_sum = np.sum(h_num_data_m_MC)
+        den_sum = np.sum(h_den_data_m_MC)
+        num_thresh = num_sum / 10
+        den_thresh = den_sum / 10
+
+        print("full arrays and sums")
+        print(h_num_data_m_MC)
+        print(np.sum(h_num_data_m_MC))
+        print(h_den_data_m_MC)
+        print(np.sum(h_den_data_m_MC))
+
+        iteration += 1
+      '''
 
 
       low_val  = 30 if var == "FS_tau_pt" else 40
       #high_val = 100 if var == "FS_tau_pt" else 150
       high_val = xbins[-1]
       use_vals = np.array([((midpoints[i] > low_val) and (midpoints[i] < high_val)) for i in range(len(midpoints))])
+      #use_vals = np.array([((xbins[i] > low_val) and (xbins[i] < high_val)) for i in range(len(xbins))])
       use_FF_ratio     = FF_ratio[use_vals]
       use_FF_ratio_err = FF_ratio_err[use_vals]
       use_midpoints    = midpoints[use_vals]
       #use_xbins    = xbins[use_vals]
+      #
       mask_all_zeros = mask_zeros(use_FF_ratio, mask_all=True)
       use_FF_ratio = use_FF_ratio[~mask_all_zeros]
       use_FF_ratio_err = use_FF_ratio_err[~mask_all_zeros]
@@ -356,20 +485,17 @@ if __name__ == "__main__":
       tail_bins = np.array([high_val, xbins[-1]]) # overflows are captured and used by default
       h_num_data_tail = get_binned_data(final_state_mode, testing, numerator_data, var, tail_bins, lumi)
       h_den_data_tail = get_binned_data(final_state_mode, testing, denominator_data, var, tail_bins, lumi)
-
-      h_num_bkgd_tail        = get_binned_backgrounds(final_state_mode, testing, numerator_bkgd, var, tail_bins, lumi)
-      h_num_summed_bkgd_tail = get_summed_backgrounds(h_numerator_backgrounds)
-      h_den_bkgd_tail        = get_binned_backgrounds(final_state_mode, testing, denominator_bkgd, var, tail_bins, lumi)
-      h_den_summed_bkgd_tail = get_summed_backgrounds(h_denominator_backgrounds)
-
+      h_num_bkgd_tail, h_num_summed_bkgd_tail = get_binned_backgrounds(final_state_mode, testing, 
+                                                   numerator_bkgd, var, tail_bins, lumi)
+      h_den_bkgd_tail, h_den_summed_bkgd_tail = get_binned_backgrounds(final_state_mode, testing, 
+                                                   denominator_bkgd, var, tail_bins, lumi)
       h_num_data_m_MC_tail, h_den_data_m_MC_tail = subtract_data_MC(semilep_mode, 
                                      h_num_data_tail, h_num_bkgd_tail, h_num_summed_bkgd_tail,
                                      h_den_data_tail, h_den_bkgd_tail, h_den_summed_bkgd_tail)
-
-      tail_ratio, tail_ratio_err = make_ratio_plot(ax_ratio, xbins, 
-                          h_num_data_m_MC_tail, "Data", np.ones(np.shape(h_num_data_m_MC_tail)),
-                          h_den_data_m_MC_tail, "Data", np.ones(np.shape(h_den_data_m_MC_tail)),
-                          no_plot=False)
+     
+      tail_ratio, tail_ratio_err = make_ratio_plot(h_num_data_m_MC_tail, "Data", np.ones(np.shape(h_num_data_m_MC_tail)),
+                                                      h_den_data_m_MC_tail, "Data", np.ones(np.shape(h_den_data_m_MC_tail)),
+                                                      use_midpoints=False, no_plot=True)
       #ax_ratio.plot([high_val, xbins[-1]], [tail_ratio[0],tail_ratio[0]], color="purple", label=f"high pt const")
 
     least_squares_pol = LeastSquares(use_midpoints, use_FF_ratio, use_FF_ratio_err, user_line) # line is a function defined above

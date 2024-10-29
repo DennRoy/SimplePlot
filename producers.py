@@ -28,7 +28,7 @@ def produce_FF_weight(setup, jet_mode, semilep_mode):
     # kinda weird, but okay
     testing, final_state_mode, _, _, _ = setup.state_info
     using_directory, _, log_file, _, file_map = setup.file_info
-    _, _, DeepTau_version, _, _, _, _ = setup.misc_info
+    _, _, DeepTau_version, _, _ = setup.misc_info
 
     fakesLabel = "myQCD"
     jet_mode = jet_mode.removesuffix("_testing")
@@ -48,7 +48,7 @@ def produce_FF_weight(setup, jet_mode, semilep_mode):
     FF_dictionary[fakesLabel]["PlotEvents"] = {}
     FF_dictionary[fakesLabel]["FF_weight"]  = cut_events_AR["FF_weight"]
     for var in vars_to_plot:
-      if ("flav" in var) or ("Generator_weight" in var): continue
+      if ("flav" in var): continue
       FF_dictionary[fakesLabel]["PlotEvents"][var] = cut_events_AR[var]
 
     return FF_dictionary

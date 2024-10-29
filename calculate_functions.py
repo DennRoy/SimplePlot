@@ -1,4 +1,5 @@
 import numpy as np
+import math 
 #import ROOT
 
 ### README
@@ -40,8 +41,8 @@ def calculate_signal_background_ratio(data, backgrounds, signals):
     total_background += process_yield
   for signal in signals:
     signal_yield = np.sum(signals[signal]["BinnedEvents"])
-    if "VBF" in signal: signal_yield = signal_yield / 100.0 # VBF scaling # TODO: handle automatically
-    if "ggH" in signal: signal_yield = signal_yield / 100.0 # ggH scaling
+    if "VBF_TauTau" in signal: signal_yield = signal_yield / 500.0 # VBF scaling # TODO: handle automatically
+    if "ggH_TauTau" in signal: signal_yield = signal_yield / 100.0 # ggH scaling
     yields.append(signal_yield)
     total_signal += signal_yield
   S_o_sqrt_SpB = total_signal/np.sqrt(total_signal+total_background)
@@ -87,6 +88,17 @@ def calculate_mt(lep_pt, lep_phi, MET_pt, MET_phi):
   #mt = np.sqrt(mt_2)
   '''
   return mt
+
+#Calculating transverse mass in 2 object system
+#Useful for emu case
+def calculate_mt_emu(m1, m2, pt1, pt2, phi1, phi2):
+  et1 = np.sqrt(m1**2 + pt1**2)
+  et2 = np.sqrt(m2**2 + pt2**2)
+  delta_phi = phi1 - phi2
+  delta_phi = np.arctan2(np.sin(delta_phi), np.cos(delta_phi))
+  mt_emu = np.sqrt(2 * et1 * et2 * (1 - np.cos(delta_phi)))
+    
+  return mt_emu
 
 
 def ROOT_mt(lep_pt, lep_eta, lep_phi, lep_mass, MET_pt, MET_phi): #import ROOT to use this function

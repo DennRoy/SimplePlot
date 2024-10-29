@@ -66,7 +66,7 @@ if __name__ == "__main__":
   DeepTau_version = args.DeepTau_version # default is 2p5 [possible values 2p1 and 2p5]
 
   # final_state_mode affects many things automatically, including good_events, datasets, plotting vars, etc.
-  final_state_mode = args.final_state # default mutau [possible values ditau, mutau, etau, dimuon]
+  final_state_mode = args.final_state # default mutau [possible values ditau, mutau, etau, dimuon, emu]
   jet_mode         = args.jet_mode # default Inclusive [possible values 0j, 1j, 2j, GTE2j]
 
   #using_directory = "/Volumes/IDrive/HTauTau_Data/2022postEE/" # full dataset

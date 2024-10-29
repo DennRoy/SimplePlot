@@ -42,13 +42,15 @@ def load_process_from_file(process, file_directory, file_map, log_file,
     log_print(f"Loading {file_map[process]}", log_file, time=True)
     file_string = file_directory + "/" + file_map[process] + ".root:Events"
   if data: 
+    #Here data stores a boolean value. In standard_plot.py in load process you can get this.
     # if a branch isn't available in Data, don't try to load it
     branches_not_in_data = ["Generator_weight", "NWEvents", "Tau_genPartFlav", "XSecMCweight",
                             "Weight_DY_Zpt", "Weight_DY_Zpt_LO", "Weight_DY_Zpt_NLO",
-                            "TauSFweight", "MuSFweight", "ElSFweight", "BTagSFfull",
+                            "TauSFweight", "MuSFweight", "ElSFweight", "ElSFweight_Trig", "BTagSFfull",
                             "PUweight", "Weight_TTbar_NNLO", "Pileup_nPU"]
     for missing_branch in branches_not_in_data:
       branches = [branch for branch in branches if branch != missing_branch]
+      #Here for data it is only saving branches that are not in "branches_not_in_data"
   try:
     processed_events = uproot.concatenate([file_string], branches, cut=good_events, library="np")
   except FileNotFoundError:
@@ -67,7 +69,7 @@ def sort_combined_processes(combined_processes_dictionary):
   for process in combined_processes_dictionary:
     if "Data" in process:
       data_dictionary[process]       = combined_processes_dictionary[process]
-    elif ("VBF" in process) or ("ggH" in process):
+    elif ("VBF_TauTau" in process) or ("ggH_TauTau" in process):
       signal_dictionary[process]     = combined_processes_dictionary[process]
     else:
       background_dictionary[process] = combined_processes_dictionary[process]
@@ -84,38 +86,38 @@ def append_to_combined_processes(process, cut_events, vars_to_plot, combined_pro
       "Cuts": {},
       "Generator_weight":  cut_events["Generator_weight"],
       "Weight_TTbar_NNLO": cut_events["Weight_TTbar_NNLO"],
-      "Weight_DY_Zpt":     cut_events["Weight_DY_Zpt_LO"],
+      "Weight_DY_Zpt_LO":     cut_events["Weight_DY_Zpt_LO"],
+      "Weight_DY_Zpt_NLO":     cut_events["Weight_DY_Zpt_NLO"],
       "TauSFweight": cut_events["TauSFweight"],
       "MuSFweight":  cut_events["MuSFweight"],
       "ElSFweight":  cut_events["ElSFweight"],
+      "ElSFweight_Trig": cut_events["ElSFweight_Trig"],
       "BTagSFfull":  cut_events["BTagSFfull"],
       "PUweight"  :  cut_events["PUweight"],
       "SF_weight": np.ones(cut_events["Generator_weight"].shape)
     }
-    if   ("DY" in process) and ("NLO" not in process): 
-      print("using LO DY ZpT")
-    elif ("DY" in process) and ("NLO" in process):
-      print("using NLO DY ZpT")
-      combined_processes[process]["Weight_DY_Zpt"] = cut_events["Weight_DY_Zpt_NLO"]
-    else:  pass
+    #if "DY" in process: combined_processes[process]["Weight_DY_Zpt_by_hand"] = cut_events["Weight_DY_Zpt_by_hand"]
   elif "Data" in process:
     combined_processes[process] = { 
       "PlotEvents": {},
       "Cuts": {},
+      "FFweight": cut_events["FFweight"]
     }
+
     if ("FF_weight" in cut_events.keys()):
       combined_processes[process]["FF_weight"] = cut_events["FF_weight"]
+    
   for var in vars_to_plot:
-    if ("Data" in process) and (("flav" in var) or ("Generator" in var)): continue
+    if ("Data" in process) and ("flav" in var): continue
     combined_processes[process]["PlotEvents"][var] = cut_events[var]
-
+    #print(cut_events)
   for cut in ["pass_cuts", "event_flavor",
               "pass_0j_cuts", "pass_1j_cuts", "pass_2j_cuts", "pass_3j_cuts",
               "pass_GTE2j_cuts"]:
     if cut in cut_events.keys():
       if ("Data" in process) and ("flav" in cut): continue
       combined_processes[process]["Cuts"][cut] = cut_events[cut]
-
+      
   return combined_processes
 
 
@@ -124,36 +126,27 @@ def load_and_store_NWEvents(process, event_dictionary):
   Read the NWEvents value for a sample and store it in the MC_dictionary,
   overriding the hardcoded values from V11 samples. Delete the NWEvents branch after.
   '''
-  #MC_dictionary[process]["NWEvents"] = event_dictionary["NWEvents"][0] # old style
+  #MC_dictionary[process]["NWEvents"] = event_dictionary["NWEvents"][0]
   MC_dictionary[process]["XSecMCweight"] = event_dictionary["XSecMCweight"][0]
-  #MC_dictionary[process]["XSecMCweight"]  = 1 # DEBUG
-  HACK = False # should only be true for KSU notriggermatching samples
-  if (HACK == True):
-    if "VBF" in process:
-      print("HARDCODING VBF NWEVENTS AND XSECMCWEIGHT")
-      ##MC_dictionary[process]["XSecMCweight"] = 0.002829568
-      MC_dictionary[process]["XSecMCweight"] = 0.0016263 # from "nominal" preEE sample # hack for pre Hlep
-    if "ggH" in process:
-      print("HARDCODING ggH NWEVENTS AND XSECMCWEIGHT")
-      MC_dictionary[process]["XSecMCweight"] = 0.0027819 # from "nominal" preEE sample # hack for pre Hlep
+  #if "VBF" in process: # TODO: address this hardcoding at some point
+  #  print("HARDCODING VBF NWEVENTS AND XSECMCWEIGHT")
+  #  MC_dictionary[process]["XSecMCweight"] = 0.002829568
+  if "ggH" in process: # TODO: address this hardcoding at some point, only necessary in preEE?
+    print("HARDCODING ggH NWEVENTS AND XSECMCWEIGHT")
+    MC_dictionary[process]["XSecMCweight"] = 0.002781924
   #print("XSecMCweight", process, MC_dictionary[process]["XSecMCweight"]) # DEBUG
   #event_dictionary.pop("NWEvents")
   event_dictionary.pop("XSecMCweight")
 
 
 def customize_DY(process, final_state_mode):
-  DYtypes_LO  = ["DYGen", "DYLep", "DYJet", "DYGen10to50", "DYLep10to50", "DYJet10to50"]
-  DYtypes_NLO = ["DYGenNLO", "DYLepNLO", "DYJetNLO", "DYGen10to50NLO", "DYLep10to50NLO", "DYJet10to50NLO"]
-  combined_DYtypes = DYtypes_LO + DYtypes_NLO
-  #for DYtype in ["DYGen", "DYLep", "DYJet", "DYGen10to50", "DYLep10to50", "DYJet10to50"]:
-  for DYtype in combined_DYtypes:
+  for DYtype in ["DYGen", "DYLep", "DYJet"]:
     MC_dictionary[DYtype]["XSecMCweight"] = MC_dictionary[process]["XSecMCweight"]
   label_text = { "ditau" : r"$Z{\rightarrow}{\tau_h}{\tau_h}$",
-                 "mutau" : r"$Z{\rightarrow}{\tau_{\mu}}{\tau_h}$",
-                 "etau"  : r"$Z{\rightarrow}{\tau_e}{\tau_h}$",
-                 "emu"   : r"$Z{\rightarrow}{\tau_e}{tau_{\mu}}$",
+                 "mutau" : r"$Z{\rightarrow}{tau_{\mu}}{\tau_h}$",
+                 "etau"  : r"$Z{\rightarrow}{tau_e}{\tau_h}$",
+                 "emu"   : r"$Z{\rightarrow}{tau_e}{tau_{\mu}}$",
                  "mutau_TnP" : r"$Z{\rightarrow}{\mu}{\tau_h}$",
                  "dimuon": r"$Z{\rightarrow}{\mu}{\mu}$"}
   MC_dictionary["DYGen"]["label"] = label_text[final_state_mode]
-  MC_dictionary["DYGenNLO"]["label"] = label_text[final_state_mode]
 

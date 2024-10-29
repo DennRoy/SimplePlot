@@ -24,7 +24,7 @@ triggers_dictionary = {
              "HLT_IsoMu20_eta2p1_LooseDeepTauPFTauHPS27_eta2p1_CrossL1", 
           ],
   "etau"  : [
-             #"HLT_Ele30_WPTight_Gsf",
+             "HLT_Ele30_WPTight_Gsf",
              "HLT_Ele32_WPTight_Gsf",
              "HLT_Ele35_WPTight_Gsf",
              "HLT_Ele24_eta2p1_WPTight_Gsf_LooseDeepTauPFTauHPS30_eta2p1_CrossL1",
@@ -32,6 +32,11 @@ triggers_dictionary = {
   "dimuon": [
              "HLT_IsoMu24",
              "HLT_IsoMu27",
+          ],
+
+  "emu"  : [
+             "HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
+             "HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ", #Naila Added
           ],
 }
 

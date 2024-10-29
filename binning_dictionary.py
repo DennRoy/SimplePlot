@@ -15,7 +15,6 @@ label_dictionary = {
   "FS_t1_dz"   : r'Leading Tau $D_Z$',
   "FS_t1_chg"  : r'Leading Tau Charge',
   "FS_t1_DM"   : r'Leading Tau Decay Mode',
-  "FS_t1_mass" : r'Leading Tau Mass',
 
   "FS_t2_pt"  : r'Sub-leading Tau $p_T$ [GeV]',
   "FS_t2_eta" : r'Sub-leading Tau $\eta$',
@@ -27,36 +26,8 @@ label_dictionary = {
   "FS_t2_dz"   : r'Sub-leading Tau $D_Z$',
   "FS_t2_chg"  : r'Sub-leading Tau Charge',
   "FS_t2_DM"   : r'Sub-leading Tau Decay Mode',
-  "FS_t2_mass" : r'Sub-leading Tau Mass',
 
   "FS_trig_idx" : r'Trigger Indices',
-
-  "FS_mt_t1t2"   : r'$m_T$($\tau_1,\tau_2$) [GeV]',
-  "FS_mt_t1_MET" : r'$m_T$($\tau_1$, MET) [GeV]',
-  "FS_mt_t2_MET" : r'$m_T$($\tau_2$, MET) [GeV]',
-  "FS_mt_TOT"    : r'$m_T$ Total [GeV]',
-  "FS_dphi_t1t2" : r'$\Delta\phi_{\tau_1\tau_2}$',
-  "FS_deta_t1t2" : r'$\Delta\eta_{\tau_1\tau_2}$',
-
-  "FS_t1_FLsig"  : r'Leading Tau Flight Significance',
-  "FS_t1_FLX"    : r'Leading Tau Flight Length X',
-  "FS_t1_FLY"    : r'Leading Tau Flight Length Y',
-  "FS_t1_FLZ"    : r'Leading Tau Flight Length Z',
-  "FS_t1_FLmag"  : r'Leading Tau Flight Length',
-  "FS_t1_ipLsig" : r'Leading Tau ip Length Significance',
-  "FS_t1_ip3d"   : r'Leading Tau ip 3D',
-  "FS_t1_tk_lambda" : r'Leading Tau Track Lambda',
-  "FS_t1_tk_qoverp" : r'Leading Tau Track Q Over P',
-
-  "FS_t2_FLsig"  : r'Sub-leading Tau Flight Significance',
-  "FS_t2_FLX"    : r'Sub-leading Tau Flight Length X',
-  "FS_t2_FLY"    : r'Sub-leading Tau Flight Length Y',
-  "FS_t2_FLZ"    : r'Sub-leading Tau Flight Length Z',
-  "FS_t2_FLmag"  : r'Sub-leading Tau Flight Length',
-  "FS_t2_ipLsig" : r'Sub-leading Tau ip Length Significance',
-  "FS_t2_ip3d"   : r'Sub-leading Tau ip 3D',
-  "FS_t2_tk_lambda" : r'Sub-leading Tau Track Lambda',
-  "FS_t2_tk_qoverp" : r'Sub-leading Tau Track Q Over P',
 
   "FS_m1_pt"   : r'Leading Muon $p_T$ [GeV]',
   "FS_m1_eta"  : r'Leading Muon $\eta$',
@@ -98,10 +69,9 @@ label_dictionary = {
   "FS_tau_dxy" : r'Tau $D_{xy}$',
   "FS_tau_dz"  : r'Tau $D_{z}$',
   "FS_tau_chg" : r'Tau Charge',
-  "FS_tau_mass": r'Tau Mass [GeV]',
   "FS_tau_DM"  : r'Tau Decay Mode',
 
-  "FS_mt"      : r'Transverse Mass [GeV]',
+  "FS_mt"      : r'Transverse Mass',
   "FS_nbJet"   : r'Number of b-tagged Jets',
   "FS_acoplan" : r'Acoplanarity',
 
@@ -117,35 +87,20 @@ label_dictionary = {
   "CleanJetGT30_phi_2" : r'Sub-leading Jet $\phi$',
   "FS_mjj"    : r'Dijet Mass [GeV]',
   "FS_detajj" : r'|$\Delta\eta$|',
-  "FS_j1index" : r'Leading Jet Index of Highest Mjj Pair',
-  "FS_j2index" : r'Subeading Jet Index of Highest Mjj Pair',
-  "FS_dijet_pair_calc" : r'DiJet Index Combination',
-  "FS_dijet_pair_HTT"  : r'DiJet Index Combination - from branch',
 
-  "HTT_DiJet_MassInv_fromHighestMjj" : r'Dijet Mass [GeV] from Highest Mjj Pair',
-  "HTT_DiJet_MassInv_fromLeadingJets": r'Dijet Mass [GeV] from Leading Jets',
-  "HTT_DiJet_dEta_fromHighestMjj"    : r'|$\Delta\eta$| from Highest Mjj Pair',
-  "HTT_DiJet_dEta_fromLeadingJets"   : r'|$\Delta\eta$| from Leading Jets',
-  "HTT_DiJet_j1index"                : r'Leading Jet Index of Highest Mjj Pair - from branch',
-  "HTT_DiJet_j2index"                : r'Subleading Jet Index of Highest Mjj Pair - from branch',
+  "HTT_DiJet_MassInv_fromHighestMjj" : r'Dijet Mass [GeV]',
+  "HTT_DiJet_dEta_fromHighestMjj"    : r'|$\Delta\eta$|',
   "HTT_H_pt_using_PUPPI_MET"         : r'Higgs $p_T$ [GeV]',
-  "HTT_mT_l1l2met_using_PUPPI_MET"   : r'$m_T$($\ell_1\ell_2$, MET) [GeV]',
   "HTT_dR"      : r'$\Delta$R',
-  "HTT_m_vis"            : r'$m_{vis}$ [GeV]',
   "HTT_m_vis-KSUbinning" : r'$m_{vis}$ [GeV]',
   "HTT_m_vis-SFbinning"  : r'$m_{vis}$ [GeV]',
-  "HTT_pT_l1l2" : r'$p_T^{ll}$ [GeV]',
-  "FastMTT_PUPPIMET_mT"   : r'Fast MTT Transverse Mass [GeV]',
+  "HTT_pT_l1l2" : r'$p_T^{ll}$',
   "FastMTT_mT"   : r'Fast MTT Transverse Mass [GeV]',
-  "FastMTT_PUPPIMET_mass" : r'Fast MTT Mass [GeV]',
   "FastMTT_mass" : r'Fast MTT Mass [GeV]',
   "PV_npvs"     : r'Number of Primary Vertices',
-  "Generator_weight" : r'Generator weight',
 
   "pass_tag"    : r'Pass Tag Requirements',
   "pass_probe"    : r'Pass Probe Requirements',
-
-  "FS_LeadTkPtOverTau" : r'Lead Tau Track $p_T$ / Tau $p_T$'
 }
 
 #  channel {
@@ -159,12 +114,10 @@ binning_dictionary = {
     "FS_t1_DeepTauVSjet" : np.linspace(1, 9, 8+1),
     "FS_t1_DeepTauVSmu"  : np.linspace(1, 5, 4+1),
     "FS_t1_DeepTauVSe"   : np.linspace(1, 9, 8+1),
-    "FS_t1_dxy"  : np.linspace(0, 0.025, 25+1), #np.linspace(0, 0.20, 50+1),
-    "FS_t1_dz"   : np.linspace(0, 0.05, 25+1),  #np.linspace(0, 0.25, 50+1),
+    "FS_t1_dxy"  : np.linspace(0, 0.20, 50+1),
+    "FS_t1_dz"   : np.linspace(0, 0.25, 50+1),
     "FS_t1_chg"  : np.linspace(-2, 2, 5+1),
     "FS_t1_DM"   : np.linspace(0, 19, 20+1),
-    "FS_t1_mass" : np.linspace(0, 3, 30+1),
-
     "FS_t1_rawPNetVSjet" : np.linspace(0, 1, 50+1),
     "FS_t1_rawPNetVSmu"  : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]),
     "FS_t1_rawPNetVSe"   : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]),
@@ -175,45 +128,15 @@ binning_dictionary = {
     "FS_t2_DeepTauVSjet" : np.linspace(1, 9, 8+1),
     "FS_t2_DeepTauVSmu"  : np.linspace(1, 5, 4+1),
     "FS_t2_DeepTauVSe"   : np.linspace(1, 9, 8+1),
-    "FS_t2_dxy"  : np.linspace(0, 0.025, 25+1), #np.linspace(0, 0.20, 50+1),
-    "FS_t2_dz"   : np.linspace(0, 0.05, 25+1),  #np.linspace(0, 0.25, 50+1),
+    "FS_t2_dxy"  : np.linspace(0, 0.20, 50+1),
+    "FS_t2_dz"   : np.linspace(0, 0.25, 50+1),
     "FS_t2_chg"  : np.linspace(-2, 2, 5+1),
     "FS_t2_DM"   : np.linspace(0, 19, 20+1),
-    "FS_t2_mass" : np.linspace(0, 3, 30+1),
-
     "FS_t2_rawPNetVSjet" : np.linspace(0, 1, 50+1),
     "FS_t2_rawPNetVSmu"  : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]),
     "FS_t2_rawPNetVSe"   : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]),
 
     "FS_trig_idx" : np.linspace(-1, 4, 5+1),
-
-    "FS_mt_t1t2"   : np.linspace(0, 300, 30+1),
-    "FS_mt_t1_MET" : np.linspace(0, 150, 30+1),
-    "FS_mt_t2_MET" : np.linspace(0, 150, 30+1),
-    "FS_mt_TOT"    : np.linspace(0, 50, 50+1),
-    "FS_dphi_t1t2" : np.linspace(-3.2, 3.2, 32+1),
-    "FS_deta_t1t2" : np.linspace(0, 4, 31+1),
-
-    "FS_t1_FLsig"  : np.linspace(-5, 20, 50+1),
-    "FS_t1_FLX"    : np.linspace(-0.01, 0.01, 20+1), # most entries are at zero.
-    "FS_t1_FLY"    : np.linspace(-0.01, 0.01, 20+1),
-    "FS_t1_FLZ"    : np.linspace(-0.01, 0.01, 20+1),
-    "FS_t1_FLmag"  : np.linspace(0, 0.02, 20+1),
-    "FS_t1_ipLsig" : np.linspace(-10, 10, 20+1),
-    "FS_t1_ip3d"   : np.linspace(-0.02, 0.02, 20+1),
-    "FS_t1_tk_lambda" : np.linspace(-1.5, 1.5, 40+1),
-    "FS_t1_tk_qoverp" : np.linspace(-0.1, 0.1, 40+1),
-
-    "FS_t2_FLsig"  : np.linspace(-5, 20, 50+1),
-    "FS_t2_FLX"    : np.linspace(-0.01, 0.01, 20+1),
-    "FS_t2_FLY"    : np.linspace(-0.01, 0.01, 20+1),
-    "FS_t2_FLZ"    : np.linspace(-0.01, 0.01, 20+1),
-    "FS_t2_FLmag"  : np.linspace(0, 0.02, 20+1),
-    "FS_t2_ipLsig" : np.linspace(-10, 10, 20+1),
-    "FS_t2_ip3d"   : np.linspace(-0.02, 0.02, 20+1),
-    "FS_t2_tk_lambda" : np.linspace(-1.5, 1.5, 40+1),
-    "FS_t2_tk_qoverp" : np.linspace(-0.1, 0.1, 40+1),
-
   },
 
   "mutau" : {
@@ -222,27 +145,24 @@ binning_dictionary = {
     "FS_mu_phi"  : np.linspace(-3.2, 3.2, 32+1),
     "FS_mu_iso"  : np.linspace(0, 1, 25+1),
     "FS_mu_dxy"  : np.linspace(0, 0.025, 50+1),
-    "FS_mu_dz"   : np.linspace(0, 0.05, 50+1), #np.linspace(0, 0.25, 50+1),
+    "FS_mu_dz"   : np.linspace(0, 0.25, 50+1),
     "FS_mu_chg"  : np.linspace(-2, 2, 5+1),
 
     "FS_tau_pt"  : np.linspace(0, 180, 36+1),
     "FS_tau_eta" : np.linspace(-3, 3, 30+1),
     "FS_tau_phi" : np.linspace(-3.2, 3.2, 32+1),
-    "FS_tau_dxy"  : np.linspace(0, 0.025, 50+1), #np.linspace(0, 0.20, 50+1),
-    "FS_tau_dz"   : np.linspace(0, 0.05, 50+1),  #np.linspace(0, 0.25, 50+1),
+    "FS_tau_dxy" : np.linspace(0, 0.20, 50+1),
+    "FS_tau_dz"  : np.linspace(0, 0.25, 50+1),
     "FS_tau_chg" : np.linspace(-2, 2, 5+1),
     "FS_tau_DM"  : np.linspace(0, 19, 20+1),
-    "FS_tau_mass" : np.linspace(0, 3, 30+1),
 
     "FS_tau_rawPNetVSjet" : np.linspace(0, 1, 50+1),
     "FS_tau_rawPNetVSmu"  : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]), # plot logx
     "FS_tau_rawPNetVSe"   : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]),
-
-    "FS_LeadTkPtOverTau" : np.linspace(0, 1, 51),
   },
 
   "etau" : {
-    "FS_el_pt"   : np.linspace(0, 120, 40+1),
+    "FS_el_pt"   : np.linspace(20, 100, 49+1), #0, 120, 60+1
     "FS_el_eta"  : np.linspace(-3, 3, 30+1),
     "FS_el_phi"  : np.linspace(-3.2, 3.2, 32+1),
     "FS_el_iso"  : np.linspace(0, 1, 25+1),
@@ -250,14 +170,13 @@ binning_dictionary = {
     "FS_el_dz"   : np.linspace(0, 0.25, 50+1),
     "FS_el_chg"  : np.linspace(-2, 2, 5+1),
 
-    "FS_tau_pt"  : np.linspace(0, 180, 36+1),
+    "FS_tau_pt"  : np.linspace(20, 100, 49+1), #0, 180, 36+1
     "FS_tau_eta" : np.linspace(-3, 3, 30+1),
     "FS_tau_phi" : np.linspace(-3.2, 3.2, 32+1),
-    "FS_tau_dxy"  : np.linspace(0, 0.025, 25+1), #np.linspace(0, 0.20, 50+1),
-    "FS_tau_dz"   : np.linspace(0, 0.05, 25+1),  #np.linspace(0, 0.25, 50+1),
+    "FS_tau_dxy" : np.linspace(0, 0.20, 50+1),
+    "FS_tau_dz"  : np.linspace(0, 0.25, 50+1),
     "FS_tau_chg" : np.linspace(-2, 2, 5+1),
     "FS_tau_DM"  : np.linspace(0, 19, 20+1),
-    "FS_tau_mass" : np.linspace(0, 3, 30+1),
 
     "FS_tau_rawPNetVSjet" : np.linspace(0, 1, 50+1),
     "FS_tau_rawPNetVSmu"  : np.array([0, 0.95, 0.96, 0.97, 0.98, 0.99, 1]), # plot logx
@@ -307,6 +226,24 @@ binning_dictionary = {
     "FS_m2_chg"  : np.linspace(-2, 2, 5+1),
     "FS_m_vis_tight" : np.linspace(70, 110, 80+1),
   },
+  #Naila
+  "emu" : {
+    "FS_el_pt"   : np.linspace(0, 120, 40+1),
+    "FS_el_eta"  : np.linspace(-3, 3, 30+1),
+    "FS_el_phi"  : np.linspace(-3.2, 3.2, 32+1),
+    "FS_el_iso"  : np.linspace(0, 1, 25+1),
+    "FS_el_dxy"  : np.linspace(0, 0.05, 50+1),
+    "FS_el_dz"   : np.linspace(0, 0.25, 50+1),
+    "FS_el_chg"  : np.linspace(-2, 2, 5+1),
+
+    "FS_mu_pt"   : np.linspace(0, 120, 40+1),
+    "FS_mu_eta"  : np.linspace(-3, 3, 30+1),
+    "FS_mu_phi"  : np.linspace(-3.2, 3.2, 32+1),
+    "FS_mu_iso"  : np.linspace(0, 1, 25+1),
+    "FS_mu_dxy"  : np.linspace(0, 0.025, 50+1),
+    "FS_mu_dz"   : np.linspace(0, 0.25, 50+1),
+    "FS_mu_chg"  : np.linspace(-2, 2, 5+1), #What is m_vis_tightfor muon in dimuon
+  },  
 
   "common" : {
     # calculated on the fly
@@ -323,12 +260,8 @@ binning_dictionary = {
     "CleanJetGT30_phi_1" : np.linspace(-3.2, 3.2, 32+1),
     "CleanJetGT30_phi_2" : np.linspace(-3.2, 3.2, 32+1),
     "CleanJetGT30_phi_3" : np.linspace(-3.2, 3.2, 32+1),
-    "FS_mjj"     : np.linspace(0, 1500, 30+1),
-    "FS_detajj"  : np.linspace(0, 7, 31+1),
-    "FS_j1index" : np.linspace(0, 10, 10+1),
-    "FS_j2index" : np.linspace(0, 10, 10+1),
-    "FS_dijet_pair_calc" : np.linspace(0, 50, 50+1),
-    "FS_dijet_pair_HTT"  : np.linspace(0, 50, 50+1),
+    "FS_mjj"    : np.linspace(0, 1500, 30+1),
+    "FS_detajj" : np.linspace(0, 7, 31+1),
 
     # from branches
     "MET_pt"      : np.linspace(0, 150, 30+1),
@@ -339,28 +272,16 @@ binning_dictionary = {
     "CleanJet_pt" : np.linspace(20, 200, 30+1),
     "CleanJet_eta": np.linspace(-5, 5, 50+1),
     "HTT_DiJet_MassInv_fromHighestMjj" : np.linspace(0, 1500, 30+1),
-    "HTT_DiJet_MassInv_fromLeadingJets": np.linspace(0, 1500, 30+1),
     "HTT_DiJet_dEta_fromHighestMjj"    : np.linspace(0, 7, 35+1),
-    "HTT_DiJet_dEta_fromLeadingJets"   : np.linspace(0, 7, 35+1),
-    "HTT_DiJet_j1index"                : np.linspace(0, 10, 10+1),
-    "HTT_DiJet_j2index"                : np.linspace(0, 10, 10+1),
     "HTT_H_pt_using_PUPPI_MET"         : np.linspace(0, 300, 30+1),
-    "HTT_mT_l1l2met_using_PUPPI_MET"   : np.linspace(0, 300, 30+1),
     "HTT_dR"                : np.linspace(0, 6, 60+1),
-    #"HTT_m_vis"             : np.linspace(0, 300, 30+1), # same as KSU binning
-    "HTT_m_vis"             : np.linspace(50, 310, 12+1),
     "HTT_m_vis-KSUbinning"  : np.linspace(0, 300, 30+1),
     "HTT_m_vis-SFbinning"   : np.linspace(0, 200, 40+1),
-    "HTT_pT_l1l2" : np.linspace(0, 250, 50+1),
-    "FastMTT_PUPPIMET_mT"   : np.linspace(0, 400, 40+1),
+    "HTT_pT_l1l2" : np.linspace(0, 150, 30+1),
     "FastMTT_mT"   : np.linspace(0, 400, 40+1),
-    #"FastMTT_PUPPIMET_mass" : np.linspace(0, 400, 20+1),
-    "FastMTT_PUPPIMET_mass" : np.linspace(50, 290, 12+1),
-    "FastMTT_mass" : np.linspace(50, 290, 12+1),
+    "FastMTT_mass" : np.linspace(0, 400, 20+1),
     "FS_t1_flav" : np.linspace(0, 11, 11+1),
     "FS_t2_flav" : np.linspace(0, 11, 11+1),
     "PV_npvs"    : np.linspace(0, 90, 30+1),
-    #"run"        : np.linspace(355000, 365000, 10000),
-    "Generator_weight" : np.linspace(-100, 100, 100+1),
   }
 }

@@ -22,47 +22,43 @@ def set_dataset_info(final_state_mode):
   return use_dataset, reject_datasets
 
 
+
 def update_data_filemap(luminosity_key, file_map): 
   if luminosity_key == "2022 C":
     file_map["DataTau"]      = "Data/Tau_Run2022C*"
     file_map["DataMuon"]     = "Data/Muon_Run2022C*"
     file_map["DataElectron"] = "Data/EGamma_Run2022C*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022C*"
   if luminosity_key == "2022 D":
     file_map["DataTau"]      = "Data/Tau_Run2022D*"
     file_map["DataMuon"]     = "Data/Muon_Run2022D*"
     file_map["DataElectron"] = "Data/EGamma_Run2022D*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022D*"
   if luminosity_key == "2022 CD":
     file_map["DataTau"]      = "Data/Tau_Run2022*"
     file_map["DataMuon"]     = "Data/Muon_Run2022*"
     file_map["DataElectron"] = "Data/EGamma_Run2022*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022*"
   if luminosity_key == "2022 E":
     file_map["DataTau"]      = "Data/Tau_Run2022E*"
     file_map["DataMuon"]     = "Data/Muon_Run2022E*"
     file_map["DataElectron"] = "Data/EGamma_Run2022E*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022E*"
   if luminosity_key == "2022 F":
     file_map["DataTau"]      = "Data/Tau_Run2022F*"
     file_map["DataMuon"]     = "Data/Muon_Run2022F*"
     file_map["DataElectron"] = "Data/EGamma_Run2022F*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022F*"
   if luminosity_key == "2022 G":
     file_map["DataTau"]      = "Data/Tau_Run2022G*"
     file_map["DataMuon"]     = "Data/Muon_Run2022G*"
     file_map["DataElectron"] = "Data/EGamma_Run2022G*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022G*"
   if luminosity_key == "2022 EFG":
     file_map["DataTau"]      = "Data/Tau_Run2022*"
     file_map["DataMuon"]     = "Data/Muon_Run2022*"
     file_map["DataElectron"] = "Data/EGamma_Run2022*"
-  if luminosity_key == "2022":
-    file_map["DataTau"]      = "Data/Tau_Run2022*"
-    file_map["DataMuon"]     = "Data/Muon_Run2022*"
-    file_map["DataElectron"] = "Data/EGamma_Run2022*"
-  if luminosity_key == "2023 C":
-    file_map["DataTau"]      = "Data/Tau_Run2023*"
-    file_map["DataMuon"]     = "Data/Muon_Run2023*"
-    file_map["DataElectron"] = "Data/EGamma_Run2023*"
-  if luminosity_key == "2023 D":
-    file_map["DataTau"]      = "Data/Tau_Run2023*"
-    file_map["DataMuon"]     = "Data/Muon_Run2023*"
-    file_map["DataElectron"] = "Data/EGamma_Run2023*"
+    file_map["DataEMu"]      = "Data/MuonEG_Run2022*"
   return file_map 
 
 testing_file_map = {
@@ -74,13 +70,17 @@ testing_file_map = {
   "TTToFullyHadronic" : "TT/TTToFullyHadronic*",
 
   "DYInc"    : "DY/DYJetsToLL_M-50_LO_HTauTau*",
-  "DYIncNLO" : "DY/DYJetsToLL_M-50_NLO_HTauTau*",
+  "DYIncNLO" : "DY_NLO/DYJetsToLL_M-50_HTauTau*",
+
+  "TTTo2L2Nu"       : "TT/TTTo2L2Nu_HTauTau_2022postEE_step2_part10*",
+  "TTToFullyHadronic" : "TT/TTToFullyHadronic*",
+  "TTToSemiLeptonic"  : "TT/TTToSemiLeptonic*",
 
   "WJetsInc"    : "WJ/WJetsToLNu_LO_HTauTau*",
   "WJetsIncNLO" : "WJ/WJetsToLNu_HTauTau*",
 
-  "VBF"   : "Signal/VBF*",
-  "ggH"   : "Signal/ggH*",
+  "VBF_TauTau"   : "Signal/VBF_TauTau_HTauTau*",
+  "ggH_TauTau"   : "Signal/ggH_TauTau_HTauTau_*",
 }
 
 
@@ -91,18 +91,15 @@ full_file_map = {
   "DataElectron" : "Data/EGamma_Run*",
   "DataEMu"  : "Data/MuonEG_Run*",
 
-  "DYInc"    : "DY/DYJetsToLL_M-50_LO_HTauTau*",
-  #"DY10to50" : "DY/DYJetsToLL_M-10to50_LO_HTauTau*",
+  "DYInc" : "DY/DYJetsToLL_M-50_LO_HTauTau*",
+#  "DYInc" : "DY/DYJetsToLL_M-50_NLO_HTauTau*",
+
   #"DYJetsToLL_M-50_1J" : "DY/DYJetsToLL_M-50_1J*",
   #"DYJetsToLL_M-50_2J" : "DY/DYJetsToLL_M-50_2J*",
   #"DYJetsToLL_M-50_3J" : "DY/DYJetsToLL_M-50_3J*",
   #"DYJetsToLL_M-50_4J" : "DY/DYJetsToLL_M-50_4J*",
 
-  #"DYIncNLO"    : "DY/DYJetsToLL_M-50_NLO_HTauTau*",
-  "DY10to50NLO" : "DY/DYJetsToLL_M-10to50_NLO_HTauTau*",
-  "DY0JNLO" : "DY/DY0JetsToLL_M-50_NLO*",
-  "DY1JNLO" : "DY/DY1JetsToLL_M-50_NLO*",
-  "DY2JNLO" : "DY/DY2JetsToLL_M-50_NLO*",
+  "DYIncNLO" : "DY/DYJetsToLL_M-50_NLO_HTauTau*",
 
   "TTTo2L2Nu"         : "TT/TTTo2L2Nu*",
   "TTToFullyHadronic" : "TT/TTToFullyHadronic*",
@@ -120,6 +117,7 @@ full_file_map = {
   "ST_TWminus_LNu2Q"   : "ST/ST_TWminus_LNu2Q*",
 
   "WJetsInc"    : "WJ/WJetsToLNu_LO_HTauTau*",
+#  "WJetsInc" : "WJ/WJetsToLNu_HTauTau*",
   "WJetsIncNLO" : "WJ/WJetsToLNu_HTauTau*",
   #"WJetsIncNLO" : "WJ/WJetsToLNu_HTauTau*",
   #"WJetsToLNu_1J" : "WJ/W1JetsToLNu*",
@@ -131,11 +129,16 @@ full_file_map = {
   "WWTo2L2Nu" : "VV/WWTo2L2Nu*",
   "WWTo4Q"    : "VV/WWTo4Q*",
   "WWToLNu2Q" : "VV/WWToLNu2Q*",
+  "ggH_WW"    : "WW/ggH_WW_HTauTau*",
+  "ttH_WW"    : "WW/ttH_WW*",
+  "VBF_WW"    : "WW/VBF_WW*",
+  
 
   #"WZ"        : "VV/WZ*", # WZ Inc. available but untested
   "WZTo3LNu"  : "VV/WZTo3LNu*",
   "WZTo2L2Q"  : "VV/WZTo2L2Q*",
   "WZToLNu2Q" : "VV/WZToLNu2Q*",
+
 
   #"ZZ"        : "VV/ZZ*", # ZZ Inc. available but untested
   "ZZTo2L2Nu" : "VV/ZZTo2L2Nu*",
@@ -155,12 +158,6 @@ full_file_map = {
   #"QCD_HT-1500to2000" : "QCD/QCD_HT1500to2000_HTauTau*",
   #"QCD_HT-2000"       : "QCD/QCD_HT2000toInf_HTauTau*",
 
-  #"VBF"   : "Signal/VBF*private*",
-  #"VBF"   : "Signal/VBF*",
-  #"ggH"   : "Signal/ggH*",
-
-  "VBF"   : "Signal/VBF_TauTau_UnFiltered*",
-  "ggH"   : "Signal/ggH_TauTau_UnFiltered*",
-  #"VBF"   : "Signal/VBF_TauTau_Filtered*",
-  #"ggH"   : "Signal/ggH_TauTau_Filtered*",
+  "VBF_TauTau"   : "Signal/VBF_TauTau_HTauTau_*",
+  "ggH_TauTau"   : "Signal/ggH_TauTau_HTauTau_*",
 }

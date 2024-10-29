@@ -10,69 +10,40 @@ from iminuit import Minuit
 from iminuit.cost import LeastSquares
 
 # explicitly import used functions from user files, grouped roughly by call order and relatedness
-# import statements for setup
-from setup import setup_handler, set_good_events
-from branch_functions import set_branches
-from plotting_functions import set_vars_to_plot
-from file_map_dictionary import set_dataset_info
-
-# import statements for data loading and processing
+from file_map_dictionary   import testing_file_map, full_file_map, testing_dimuon_file_map, dimuon_file_map
+from file_map_dictionary   import pre2022_file_map
 from file_functions        import load_process_from_file, append_to_combined_processes, sort_combined_processes
-from FF_functions          import * # will lead to recursive import
-from cut_and_study_functions import apply_HTT_FS_cuts_to_process
-from cut_and_study_functions import apply_cut, apply_jet_cut, set_protected_branches
 
-# plotting
 from luminosity_dictionary import luminosities_with_normtag as luminosities
-from plotting_functions    import get_midpoints, make_eta_phi_plot
-from plotting_functions    import get_binned_data, get_binned_backgrounds, get_binned_signals, get_summed_backgrounds
-from plotting_functions    import setup_ratio_plot, make_ratio_plot, spruce_up_plot, spruce_up_legend
-from plotting_functions    import setup_single_plot, spruce_up_single_plot
-from plotting_functions    import plot_data, plot_MC, plot_signal, make_bins, make_pie_chart, plot_raw
 
-from binning_dictionary import label_dictionary
+from cut_and_study_functions import set_branches, set_vars_to_plot, set_good_events
+from cut_and_study_functions import apply_HTT_FS_cuts_to_process, apply_AR_cut
+
+from plotting_functions    import get_binned_data, get_binned_backgrounds, get_binned_signals
+from plotting_functions    import setup_ratio_plot, make_ratio_plot, spruce_up_plot, spruce_up_legend
+from plotting_functions    import plot_data, plot_MC, plot_signal, make_bins
+
+from plotting_functions import get_midpoints, setup_single_plot, spruce_up_single_plot
 
 from calculate_functions   import calculate_signal_background_ratio, yields_for_CSV
 from utility_functions     import time_print, make_directory, print_setup_info, log_print
 
+from cut_and_study_functions import append_lepton_indices, apply_cut, apply_jet_cut, add_FF_weights
+from cut_and_study_functions import load_and_store_NWEvents, customize_DY, append_flavor_indices, set_protected_branches
+
 from cut_ditau_functions import make_ditau_cut
 from cut_mutau_functions import make_mutau_cut
+from FF_functions import *
 
-
-
-# explicitly import used functions from user files, grouped roughly by call order and relatedness
-#from file_map_dictionary   import testing_file_map, full_file_map, testing_dimuon_file_map, dimuon_file_map
-#from file_map_dictionary   import pre2022_file_map
-#from file_functions        import load_process_from_file, append_to_combined_processes, sort_combined_processes
-
-#from luminosity_dictionary import luminosities_with_normtag as luminosities
-
-#from cut_and_study_functions import set_branches, set_vars_to_plot, set_good_events
-#from cut_and_study_functions import apply_HTT_FS_cuts_to_process, apply_AR_cut
-
-#from plotting_functions    import get_binned_data, get_binned_backgrounds, get_binned_signals
-#from plotting_functions    import setup_ratio_plot, make_ratio_plot, spruce_up_plot, spruce_up_legend
-#from plotting_functions    import plot_data, plot_MC, plot_signal, make_bins
-
-#from plotting_functions import get_midpoints, setup_single_plot, spruce_up_single_plot
-
-#from calculate_functions   import calculate_signal_background_ratio, yields_for_CSV
-#from utility_functions     import time_print, make_directory, print_setup_info, log_print
-
-#from cut_and_study_functions import append_lepton_indices, apply_cut, apply_jet_cut, add_FF_weights
-#from cut_and_study_functions import load_and_store_NWEvents, customize_DY, append_flavor_indices, set_protected_branches
-
-#from cut_ditau_functions import make_ditau_cut
-#from cut_mutau_functions import make_mutau_cut
-#from FF_functions import *
-
-#from binning_dictionary import label_dictionary
+from binning_dictionary import label_dictionary
 
 def line(x, a, b):
     return a + x * b
 
 if __name__ == "__main__":
   '''
+  '''
+
   import argparse 
   parser = argparse.ArgumentParser(description='Make a standard Data-MC agreement plot.')
   # store_true : when the argument is supplied, store it's value as true
@@ -143,21 +114,6 @@ if __name__ == "__main__":
 
   dataset = dataset_dictionary[final_state_mode]
   reject_datasets = reject_dataset_dictionary[final_state_mode]
-  '''
-
-  # do setup
-  setup = setup_handler()
-  testing, final_state_mode, jet_mode, era, lumi = setup.state_info
-  using_directory, plot_dir, log_file, use_NLO, file_map = setup.file_info
-  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode, _ = setup.misc_info
-
-  print_setup_info(setup)
-
-  do_QCD = do_JetFakes
-  _, reject_datasets = set_dataset_info(final_state_mode)
-
-  dataset_dictionary = {"ditau" : "DataTau", "mutau" : "DataMuon", "etau" : "DataElectron", "emu" : "DataEMu"}
-  dataset = dataset_dictionary[final_state_mode]
 
   store_region_data_dictionary = {}
   store_region_bkgd_dictionary = {}
@@ -169,7 +125,6 @@ if __name__ == "__main__":
   pseudo_AR = "DRar" # need the events from here to make the QCD estimate
   # DRsr DRar is closure check 
   for region in [pseudo_SR, pseudo_AR]:
-    good_events  = set_good_events(final_state_mode, AR_region=("AR" in region.upper()), DR_region=("DR" in region))
 
     vars_to_plot = set_vars_to_plot(final_state_mode, jet_mode=jet_mode)
 
@@ -181,38 +136,19 @@ if __name__ == "__main__":
       gc.collect()
       if (process in reject_datasets): continue
 
-      branches     = set_branches(final_state_mode, DeepTau_version, process)
       new_process_dictionary = load_process_from_file(process, using_directory, file_map, log_file,
-                                              #branches, base_selection, final_state_mode,
-                                              branches, good_events, final_state_mode,
+                                              branches, base_selection, final_state_mode,
                                               data=("Data" in process), testing=testing)
       event_dictionary = new_process_dictionary[process]["info"]
       if (event_dictionary == None): continue
 
-      #protected_branches = ["None"]
-      #event_dictionary = append_lepton_indices(event_dictionary)
-      #if ("Data" not in process):
-      #  load_and_store_NWEvents(process, event_dictionary)
-      #  if ("DY" in process): customize_DY(process, final_state_mode)
-      #  event_dictionary = append_flavor_indices(event_dictionary, final_state_mode, keep_fakes=True)
-
-      #event_dictionary = FF_control_flow(final_state_mode, semilep_mode, region, event_dictionary, DeepTau_version)
-      #event_dictionary = apply_cut(event_dictionary, "pass_"+region+"_cuts", protected_branches)
-
-      #if (event_dictionary==None or len(event_dictionary["run"])==0): continue
-      #event_dictionary   = apply_jet_cut(event_dictionary, jet_mode)
-      #if (event_dictionary==None or len(event_dictionary["run"])==0): continue
-
       protected_branches = ["None"]
-      from cut_and_study_functions import append_lepton_indices, append_flavor_indices
       event_dictionary = append_lepton_indices(event_dictionary)
       if ("Data" not in process):
-        from file_functions import load_and_store_NWEvents, customize_DY
         load_and_store_NWEvents(process, event_dictionary)
         if ("DY" in process): customize_DY(process, final_state_mode)
         event_dictionary = append_flavor_indices(event_dictionary, final_state_mode, keep_fakes=True)
 
-      from FF_functions import FF_control_flow
       event_dictionary = FF_control_flow(final_state_mode, semilep_mode, region, event_dictionary, DeepTau_version)
       event_dictionary = apply_cut(event_dictionary, "pass_"+region+"_cuts", protected_branches)
 
@@ -233,7 +169,8 @@ if __name__ == "__main__":
       if (event_dictionary==None or len(event_dictionary["run"])==0): continue
 
       if ("Data" in process):
-        event_dictionary   = add_FF_weights(event_dictionary, final_state_mode, jet_mode, semilep_mode, closure=True)
+        event_dictionary   = add_FF_weights(event_dictionary, final_state_mode, jet_mode, semilep_mode, full_FF=False,
+                                            closure=True, testing=testing)
 
       # TODO : extendable to jet cuts (something I've meant to do for some time)
       if "DY" in process:
@@ -283,6 +220,7 @@ if __name__ == "__main__":
     store_region_bkgd_dictionary[region] = background_dictionary
     store_region_sgnl_dictionary[region] = signal_dictionary
 
+
   pseudo_SR_data = store_region_data_dictionary[pseudo_SR] # this has FF weights
   pseudo_SR_bkgd = store_region_bkgd_dictionary[pseudo_SR]
   pseudo_SR_sgnl = store_region_sgnl_dictionary[pseudo_SR]
@@ -290,13 +228,14 @@ if __name__ == "__main__":
   pseudo_AR_bkgd = store_region_bkgd_dictionary[pseudo_AR]
   pseudo_AR_sgnl = store_region_sgnl_dictionary[pseudo_AR]
 
+
   # switch to "QCD" to use MC
   QCD_dictionary = {}
   QCD_dictionary["myQCD"] = {}
   QCD_dictionary["myQCD"]["PlotEvents"] = {}
   QCD_dictionary["myQCD"]["FF_weight"]  = pseudo_AR_data[dataset]["FF_weight"]
   for var in vars_to_plot:
-    if ("flav" in var) or ("Generator_weight" in var): continue
+    if ("flav" in var): continue
     QCD_dictionary["myQCD"]["PlotEvents"][var] = pseudo_AR_data[dataset]["PlotEvents"][var]
 
   log_print("Processing finished!", log_file, time=True)
@@ -326,34 +265,26 @@ if __name__ == "__main__":
 
     temp_var = var
     if "HTT_m_vis" in var: var = "HTT_m_vis"
- 
     h_pseudo_SR_data = get_binned_data(final_state_mode, testing, pseudo_SR_data, var, xbins, lumi)
     h_pseudo_AR_data = get_binned_data(final_state_mode, testing, pseudo_AR_data, var, xbins, lumi)
-    h_pseudo_SR_backgrounds        = get_binned_backgrounds(final_state_mode, testing, pseudo_SR_bkgd, var, xbins, lumi)
-    h_pseudo_SR_summed_backgrounds = get_summed_backgrounds(h_pseudo_SR_backgrounds)
-    h_pseudo_AR_backgrounds        = get_binned_backgrounds(final_state_mode, testing, pseudo_AR_bkgd, var, xbins, lumi)
-    h_pseudo_AR_summed_backgrounds = get_summed_backgrounds(h_pseudo_AR_backgrounds)
-
-    h_QCD           = get_binned_backgrounds(final_state_mode, testing, QCD_dictionary, var, xbins, 1)
-    h_QCD_for_ratio = get_summed_backgrounds(h_QCD)
-
+    h_pseudo_SR_backgrounds, h_pseudo_SR_summed_backgrounds = get_binned_backgrounds(final_state_mode, testing, 
+                                                                 pseudo_SR_bkgd, var, xbins, lumi)
+    h_pseudo_AR_backgrounds, h_pseudo_AR_summed_backgrounds = get_binned_backgrounds(final_state_mode, testing, 
+                                                                 pseudo_AR_bkgd, var, xbins, lumi)
+    h_QCD, h_QCD_for_ratio = get_binned_backgrounds(final_state_mode, testing,
+                                QCD_dictionary, var, xbins, 1)
     var = temp_var
 
-    h_pseudo_SR_data_m_MC = {}
-    h_pseudo_SR_data_m_MC["Data"] = {}
-    h_pseudo_SR_data_m_MC["Data"]["BinnedEvents"] = h_pseudo_SR_data["Data"]["BinnedEvents"] - \
-                                                    h_pseudo_SR_summed_backgrounds["Bkgd"]["BinnedEvents"]
-    h_pseudo_SR_data_m_MC["Data"]["BinnedErrors"] = h_pseudo_SR_data["Data"]["BinnedErrors"] # TODO : fix this
-                                                    
+    h_pseudo_SR_data_m_MC = h_pseudo_SR_data - h_pseudo_SR_summed_backgrounds
     # add back the WJ MC 
     if (semilep_mode == "WJ"):
-      h_pseudo_SR_data_m_MC["Data"]["BinnedEvents"] += h_pseudo_SR_backgrounds[semilep_mode]["BinnedEvents"]
+      h_pseudo_SR_data_m_MC += h_pseudo_SR_backgrounds[semilep_mode]["BinnedEvents"]
     
     
     # set negative values to zero
     # ratio[np.isnan(ratio)] = 0
-    #h_pseudo_SR_data_m_MC[np.where(h_pseudo_SR_data_m_MC["Data"]["BinnedEvents"] < 0)] = 0
-    #h_pseudo_AR_weight = (h_pseudo_AR_data - h_pseudo_AR_summed_backgrounds) / h_pseudo_AR_data # not used.
+    h_pseudo_SR_data_m_MC[np.where(h_pseudo_SR_data_m_MC < 0)] = 0
+    h_pseudo_AR_weight = (h_pseudo_AR_data - h_pseudo_AR_summed_backgrounds) / h_pseudo_AR_data # not used.
 
     # reversed dictionary search for era name based on lumi 
     title_era = [key for key in luminosities.items() if key[1] == lumi][0][0]
@@ -365,16 +296,18 @@ if __name__ == "__main__":
 
     #make_ratio_plot(ax_ratio, xbins, h_pseudo_SR_data_m_MC, h_QCD_for_ratio)
     make_ratio_plot(ax_ratio, xbins, 
-                    h_pseudo_SR_data_m_MC["Data"]["BinnedEvents"], "Data", np.ones(np.shape(h_pseudo_SR_data_m_MC)),
-                    h_QCD_for_ratio["Bkgd"]["BinnedEvents"], "Data", np.ones(np.shape(h_QCD_for_ratio)))
+                    h_pseudo_SR_data_m_MC, "Data", np.ones(np.shape(h_pseudo_SR_data_m_MC)),
+                    h_QCD_for_ratio, "Data", np.ones(np.shape(h_QCD_for_ratio)))
+
+
 
     spruce_up_plot(ax_hist, ax_ratio, label_dictionary[var], title, final_state_mode, jet_mode)
-    spruce_up_legend(ax_hist, final_state_mode)
+    spruce_up_legend(ax_hist, final_state_mode, h_pseudo_SR_data_m_MC)
 
     plt.savefig(plot_dir + "/" + str(var) + ".png")
 
     # do extra stuff for second lepton leg
-    #if var in ["FS_t2_pt", "FS_mu_pt", "FS_ele_pt"]:
+    if var in ["FS_t2_pt", "FS_mu_pt", "FS_ele_pt"]:
       #fit the ratio plot, and print the fit
       #put it in an additional plot, a la FF_plot_set_1p5 (i guess you could merge those, huh?)
 

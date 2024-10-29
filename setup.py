@@ -14,16 +14,14 @@ class setup_handler:
     self.parser.add_argument('--final_state',  dest='final_state', default="mutau",     action='store')
     self.parser.add_argument('--jet_mode',     dest='jet_mode',    default="Inclusive", action='store')
     self.parser.add_argument('--era',          dest='era',         default="2022 EFG",  action='store')
-    self.parser.add_argument('--use_NLO',      dest='use_NLO',     default=True,       action='store_true')
+    self.parser.add_argument('--use_NLO',      dest='use_NLO',     default=False,       action='store_true')
     self.parser.add_argument('--plot_dir',     dest='plot_dir',    default="plots",     action='store')
     self.parser.add_argument('--DeepTau',      dest='DeepTau_version', default="2p5",   action='store')
     self.parser.add_argument('--hide_plots',   dest='hide_plots',  default=False,       action='store_true')
     self.parser.add_argument('--hide_yields',  dest='hide_yields', default=False,       action='store_true')
     self.parser.add_argument('--do_JetFakes',  dest='do_JetFakes', default=True,        action='store')
-    self.parser.add_argument('--semilep_mode', dest='semilep_mode', default="Full",     action='store')
-    self.parser.add_argument('--presentation', dest='presentation_mode',  default=False, action='store')
-
-    self.parser.add_argument('--one_process',    dest='one_process',    default=None,      action='store')
+    self.parser.add_argument('--semilep_mode', dest='semilep_mode', default="QCD",      action='store')
+    self.parser.add_argument('--use_new',      dest='use_new',      default="True",    action='store')
 
     args = self.parser.parse_args()
 
@@ -38,8 +36,6 @@ class setup_handler:
 
     # file info
     infile_directory = self.set_infile_directory(era, final_state_mode)
-    # for single process comparisons only
-    #plot_dir_name = "FS_plots/" + args.one_process.split("HTauTau")[0] + args.plot_dir + "_" + "postEE" + final_state_mode + "_" + jet_mode
     plot_dir_name = "FS_plots/" + args.plot_dir + "_" + final_state_mode + "_" + jet_mode
     plot_dir_name = make_directory(plot_dir_name, testing)
     logfile       = open('outputfile.log', 'w') # could be improved, not super important right now
@@ -52,10 +48,6 @@ class setup_handler:
     DeepTau_version = args.DeepTau_version # default is 2p5 [possible values 2p1 and 2p5]
     do_JetFakes  = args.do_JetFakes  # True by default, set to False to remove contributions from Fakes
     semilep_mode = args.semilep_mode # default is QCD [possible values are Full, QCD, and WJ] (Full is both)
-    presentation_mode = args.presentation_mode # default is False, True hides yields and S/B on plots, and combines bkgds
-
-    # comparison info (for file/process comparisons)
-    one_process = args.one_process
 
     # set three named tuples to collect class information that can be accessed later
     from collections import namedtuple
@@ -63,24 +55,18 @@ class setup_handler:
     self.state_info     = state_info_template(testing, final_state_mode, jet_mode, era, lumi)
     file_info_template  = namedtuple("File_info", "infile_directory, plot_dir_name, logfile, use_NLO, file_map")
     self.file_info      = file_info_template(infile_directory, plot_dir_name, logfile, use_NLO, file_map)
-    misc_info_template  = namedtuple("Misc_info", "hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode, one_process, presentation_mode")
-    self.misc_info      = misc_info_template(hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode, one_process, presentation_mode)
+    misc_info_template  = namedtuple("Misc_info", " hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode")
+    self.misc_info      = misc_info_template(hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode)
   # end class init
 
   def set_infile_directory(self, era, final_state_mode):
     #lxplus_redirector = "root://cms-xrd-global.cern.ch//"
     #eos_dir           = "/eos/user/b/ballmond/NanoTauAnalysis/analysis/"
     era_modifier_2022 = "preEE" if (("C" in era) or ("D" in era)) else "postEE"
-    home_dir = "/Users/ballmond/LocalDesktop/HiggsTauTau" # there's no place like home :)
-    active_dir = "/V12_PFRel_"+era_modifier_2022+"_nominal/"
-    #active_dir = "/V12_PFRel_"+era_modifier_2022+"_notriggermatching/"
-    active_dir = "/V12_"+era_modifier_2022+"_HLepRare_notriggermatching/"
-    #active_dir = "/V12_combined_eras_2022_HLepRare_notriggermatching/"
-    #active_dir = "/Hlep_2023preBPIX/"
-    active_dir += final_state_mode
-    full_dir = home_dir + active_dir # add lxplus redirector if on eos
-    #full_dir = "/Volumes/IDrive/HTauTau_Data/mutau_postEE_Hlep_comparison/Hlep/" # SSD hack
+    full_dir = "/Users/giuliasorrentino/Desktop/HLepRareNtuples/HTauTau_2022"+era_modifier_2022+"_Hlep_" + final_state_mode
+    #full_dir = "/Users/giuliasorrentino/Desktop/JulyNtuples/HTauTau_2022"+era_modifier_2022+"_step2_" + final_state_mode
     return full_dir
+
 
   
   def set_file_map(self, testing, use_NLO, era):
@@ -95,22 +81,13 @@ class setup_handler:
     return file_map
 
 
-def set_good_events(final_state_mode, AR_region=False, DR_region=False, disable_triggers=False, useMiniIso=False):
+def set_good_events(final_state_mode, AR_region=False, disable_triggers=False, useMiniIso=False):
   '''
   Return a string defining a 'good_events' flag used by uproot to preskim input events
   to only those passing these simple requirements. 'good_events' changes based on
   final_state_mode, and the trigger condition is removed if a trigger study is 
   being conducted (since requiring the trigger biases the study).
   '''
-  DEBUG = False
-  if (DEBUG):
-    basic_cuts = "(METfilters) & (LeptonVeto==0)"
-    jet_vetomaps = " & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV)"
-    trigger    = " & Trigger_ditau"
-    HTT_SR     = " & (HTT_SRevent)"
-    type_req   = " & (abs(HTT_pdgId)==15*15)"
-    # directly applying restrictions, always use METfilters, string can't be empty
-    return basic_cuts + HTT_SR + type_req + trigger
   good_events = ""
   if disable_triggers: print("*"*20 + " removed trigger requirement " + "*"*20)
 
@@ -131,11 +108,7 @@ def set_good_events(final_state_mode, AR_region=False, DR_region=False, disable_
   # apply FS cut separately so it can be used with reject_duplicate_events
   # STANDARD!
   good_events =  "(METfilters) & (LeptonVeto==0)"
-  #jet_vetomaps = "" # deactivated for 2023
-  #jet_vetomaps = " & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV)"
-  jet_vetomaps = " & (JetMapVeto_EE_15GeV) & (JetMapVeto_HotCold_15GeV)"
-  #jet_vetomaps = " & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV) & (JetMapVeto_TauEE)" # only for postEE, KSU
-  #jet_vetomaps = " & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV) & (JetMapVeto_TauEEBPix)" # only for postEE, HLep
+  jet_vetomaps = " & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV)"
   #jet_vetomaps = " & (JetMapVeto_EE_25GeV) & (JetMapVeto_HotCold_25GeV)"
   #jet_vetomaps = " & (JetMapVeto_EE_15GeV) & (JetMapVeto_HotCold_15GeV)"
   #jet_vetomaps = " & (JetMapVeto_EE_30GeV)"
@@ -145,11 +118,11 @@ def set_good_events(final_state_mode, AR_region=False, DR_region=False, disable_
   #jet_vetomaps = " & (JetMapVeto_EE_30GeV) & (JetMapVeto_TauEE) & (JetMapVeto_TauHotCold)"
   #jet_vetomaps = " & (JetMapVeto_EE_15GeV) & (JetMapVeto_TauEE) & (JetMapVeto_TauHotCold)"
   #good_events = "(HTT_SRevent) & (METfilters) & (LeptonVeto==0) & (JetMapVeto_EE_30GeV) & (JetMapVeto_HotCold_30GeV)"
+  HTT_preselect_events = "& (HTT_SRevent)"
   good_events += jet_vetomaps
-  if (AR_region or DR_region): return good_events # give output with MET filters, lepton veto, and veto maps
+  if AR_region: return good_events # give output with MET filters, lepton veto, and veto maps
 
-  HTT_preselect_events = " & (HTT_SRevent)"
-  good_events += HTT_preselect_events
+  #good_events += HTT_preselect_events
   # UNDER STUDY!
   #good_events = "(HTT_SRevent) & (METfilters) & (LeptonVeto==0) & (JetMapVeto_EE_15GeV) & (JetMapVeto_HotCold_15GeV) "\
   #good_events = "(HTT_SRevent) & (METfilters) & (LeptonVeto==0) & (JetMapVeto_EE_15GeV) & (JetMapVeto_HotCold_15GeV) & "\
@@ -179,6 +152,11 @@ def set_good_events(final_state_mode, AR_region=False, DR_region=False, disable_
     good_events += " & (abs(HTT_pdgId)==11*15) & (Trigger_etau)"
     if disable_triggers: good_events = good_events.replace(" & (Trigger_etau)", "")
 
+  elif final_state_mode == "emu":
+    good_events += " & (abs(HTT_pdgId)==11*13) & (Trigger_emu) "
+    #good_events += " & (abs(HTT_pdgId)==11*13) & (Trigger_emu) "
+    if disable_triggers: good_events = good_events.replace(" & (Trigger_emu)", "")
+
   # non-HTT FS modes
   elif final_state_mode == "mutau_TnP": # remove HTT_SRevent
     good_events = "(METfilters) & (LeptonVeto==0) & (abs(HTT_pdgId)==13*15)"
@@ -198,7 +176,7 @@ if __name__ == "__main__":
   setup = setup_handler()
   testing, final_state_mode, jet_mode, era, lumi = setup.state_info
   infile_directory, plot_dir_name, logfile, use_NLO, file_map = setup.file_info
-  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode, one_process, presentation_mode = setup.misc_info
+  hide_plots, hide_yields, DeepTau_version, do_JetFakes, semilep_mode = setup.misc_info
 
   # test setup
   from branch_functions    import set_branches
