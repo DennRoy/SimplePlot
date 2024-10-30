@@ -36,7 +36,7 @@ class setup_handler:
 
     # file info
     infile_directory = self.set_infile_directory(era, final_state_mode)
-    plot_dir_name = "FS_plots/" + args.plot_dir + "_" + final_state_mode + "_" + jet_mode
+    plot_dir_name = "output/" + args.plot_dir + "_" + final_state_mode + "_" + jet_mode
     plot_dir_name = make_directory(plot_dir_name, testing)
     logfile       = open('outputfile.log', 'w') # could be improved, not super important right now
     use_NLO       = args.use_NLO     # False by default, use LO DY if False
@@ -63,8 +63,7 @@ class setup_handler:
     #lxplus_redirector = "root://cms-xrd-global.cern.ch//"
     #eos_dir           = "/eos/user/b/ballmond/NanoTauAnalysis/analysis/"
     era_modifier_2022 = "preEE" if (("C" in era) or ("D" in era)) else "postEE"
-    full_dir = "/Users/giuliasorrentino/Desktop/HLepRareNtuples/HTauTau_2022"+era_modifier_2022+"_Hlep_" + final_state_mode
-    #full_dir = "/Users/giuliasorrentino/Desktop/JulyNtuples/HTauTau_2022"+era_modifier_2022+"_step2_" + final_state_mode
+    full_dir = "/home/dennis/HTauTauPlotter/HTauTau_2022"+era_modifier_2022+"_Hlep_" + final_state_mode
     return full_dir
 
 
